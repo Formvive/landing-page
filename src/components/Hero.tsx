@@ -25,7 +25,7 @@ export default function Hero() {
       </p>
       <button className={styles.getStarted}>Get Better Feedback</button>
       <div className={styles.videoPreview}>
-        <img src="/assets/images/hero.png" alt="Dashboard preview" />
+        <Image src="/assets/images/hero.png" alt="Dashboard preview" />
         <div className={styles.videoWrapper}>
           <p>Collecting feedback shouldn’t be hard.</p>
           <span className={styles.caption}>

@@ -40,7 +40,7 @@ export default function HowItWorks() {
       <div className={styles.steps}>
         {steps.map((step, i) => (
           <div key={i} className={styles.card}>
-            <img src={step.img} alt={step.title} />
+            <Image src={step.img} alt={step.title} />
             <h3>
               <span><Image src={step.icon} className={styles.icon} alt="how it works" width={20} height={20} /></span> {step.title}
             </h3>
