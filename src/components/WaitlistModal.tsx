@@ -49,7 +49,7 @@ const WaitlistModal: React.FC<WaitlistModalProps> = ({ isOpen, onClose }) => {
 
       setIsSuccess(true);
     } catch (err) {
-      alert("Error submitting. Please try again.");
+      alert("Error submitting. Please try again." + err);
     } finally {
       setIsLoading(false);
     }
