@@ -29,12 +29,15 @@ export async function POST(request: Request) {
       return NextResponse.json({ message: "Already signed up" }, { status: 200 });
     }
 
-    const result = await collection.insertOne({ email, createdAt: new Date() });
+    await collection.insertOne({ email, createdAt: new Date() });
     // console.log("✅ [API] Inserted result:", result);
 
     return NextResponse.json({ message: "Success" }, { status: 201 });
-  } catch (error: any) {
-    console.error("❌ [API] Error:", error.message || error);
-    return NextResponse.json({ message: "Internal server error" }, { status: 500 });
+  } catch (error: unknown) {
+    if (error instanceof Error) {
+      console.error("❌ [API] Error:", error.message);
+    } else {
+      console.error("❌ [API] Unknown error", error);
+    }
   }
 }
