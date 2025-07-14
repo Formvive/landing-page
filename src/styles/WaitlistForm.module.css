@@ -1,0 +1,65 @@
+.badge {
+    display: flex;
+    flex-direction: row;
+    gap: 1rem;
+    max-width: max-content;
+    font-size: 0.75rem;
+    background: #f5f5f5;
+    color: #333;
+    padding: 0.4rem 0.75rem;
+    border-radius: 999px;
+    font-weight: 500;
+    margin-bottom: 1rem;
+}
+.WaitlistSection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 9rem;
+    background-color: #f9fafb;
+}
+.WaitlistSection h2 {
+    font-size: 4rem;
+    font-weight: 600;
+    text-align: center;
+    max-width: 900px;
+}
+.WaitlistSection p {
+    font-size: 2rem;
+    font-weight: 400;
+    text-align: center;
+    max-width: 900px;
+}
+.WaitlistSection span {
+    font-size: 1.25rem;
+    font-weight: 400;
+    text-align: center;
+}
+.WaitlistInput {
+    border: 1px solid #2B2929;
+    border-radius: 1rem;
+    padding: 10px;
+    width: 530px;
+    min-width: max-content;
+    gap: 1rem;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+.WaitlistInput input {
+    width: 100%;
+    border: none;
+    outline: none;
+}
+.WaitlistInput button {
+    background: #000;
+    color: white;
+    border: none;
+    padding: 10px;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+    display: flex;
+    flex-direction: row;
+    text-wrap: nowrap;
+}

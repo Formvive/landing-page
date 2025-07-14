@@ -27,12 +27,14 @@
   font-size: 4rem;
   font-weight: 700;
   margin-bottom: 0.5rem;
+  max-width: 900px;
 }
 
 .subtitle {
   font-size: 2rem;
   color: #666;
   margin-bottom: 3rem;
+  max-width: 900px;
 }
 
 .cards {

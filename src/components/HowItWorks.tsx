@@ -27,7 +27,7 @@ export default function HowItWorks() {
   ];
 
   return (
-    <section className={styles.how}>
+    <section className={styles.how} id="how">
       <div className={styles.badge}>
         <Image src="/assets/icons/hiw.svg" alt="how it works" width={20} height={20} />
         How it works
@@ -40,7 +40,7 @@ export default function HowItWorks() {
       <div className={styles.steps}>
         {steps.map((step, i) => (
           <div key={i} className={styles.card}>
-            <Image src={step.img} alt={step.title} />
+            <Image src={step.img} alt={step.title} width={350} height={300}/>
             <h3>
               <span><Image src={step.icon} className={styles.icon} alt="how it works" width={20} height={20} /></span> {step.title}
             </h3>

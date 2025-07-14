@@ -1,10 +1,13 @@
 .hero {
-  padding: 4.375rem;
+  padding: 5rem;
   text-align: center;
   display: flex;
   flex-direction: column;
   align-items: center;
   background: #fff;
+}
+.topBar, .hero h1, .hero p {
+  max-width: 900px;
 }
 .topBar {
   display: flex;
@@ -17,6 +20,10 @@
   font-size: 0.9rem;
   gap: 12rem;
   max-width: max-content;
+}
+.topBar span {
+  font-size: 1rem;
+  font-weight: 800;
 }
 .actions {
   display: flex;
@@ -39,6 +46,7 @@
   padding: 0.5rem 1rem;
   border-radius: 6px;
   font-weight: bold;
+  text-wrap: nowrap;
 }
 .badge {
   display: flex;
@@ -62,11 +70,9 @@
   font-weight: bold;
   border: none;
 }
-
 .videoPreview {
   margin-top: 5rem;
 }
-
 .videoWrapper {
   background: #111;
   padding: 4.5625rem;
@@ -76,20 +82,20 @@
   max-height: 40rem;
   padding-top: 25rem;
   margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
-
 .videoPreview img {
-  width: 100%;
   border-radius: 12px;
   margin-bottom: -30rem;
 }
-
 .videoWrapper p {
   font-size: 2rem;
   font-weight: 600;
   margin-bottom: 0.5rem;
+  text-align: center;
 }
-
 .caption {
   display: block;
   padding: 1rem;

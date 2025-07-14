@@ -7,9 +7,9 @@ export default function Hero() {
     <section className={styles.hero}>
       <div className={styles.topBar}>
         <div className={styles.actions}>
-          <button className={styles.cta}>Benefits</button>
-          <span>Product</span>
-          <span>Pricing</span>
+          <a href="#how"><button className={styles.cta}>Benefits</button></a>
+          <a href="#features"><span>Product</span></a>
+          {/* <a href="#benefits"><span>Pricing</span></a> */}
         </div>
         <span>FORMVIVE</span>
         <div className={styles.actions}>
@@ -19,17 +19,18 @@ export default function Hero() {
       </div>
       <div className={styles.badge}><Image src="/assets/icons/light.svg" alt="how it works" width={20} height={20} />Join the waitlist for updates<Image src="/assets/icons/arr.svg" alt="how it works" width={20} height={20} /></div>
 
-      <h1>How product teams get clear feedback faster</h1>
+      <h1>What if your feedback funnel didn’t suck?</h1>
       <p>
-        The AI-powered platform to build forms, share them, and collect real + predicted responses instantly.
+        Formvive helps modern teams run feedback loops that feel seamless for users and insightful for builders.
+        No-code. Multi-format. Plug and go.
       </p>
       <button className={styles.getStarted}>Get Better Feedback</button>
       <div className={styles.videoPreview}>
-        <Image src="/assets/images/hero.png" alt="Dashboard preview" />
+        <Image src="/assets/images/hero.png" alt="Dashboard preview" width={1300} height={550}/>
         <div className={styles.videoWrapper}>
           <p>Collecting feedback shouldn’t be hard.</p>
           <span className={styles.caption}>
-            Manual forms waste time. Low response rates cost insights. Formvive fixes this with AI-powered auto-fill so you get more data with less effort.
+            For people building real things, who need real feedback.
           </span>
         </div>
       </div>

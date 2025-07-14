@@ -22,10 +22,10 @@ export default function Footer() {
                 <div className={styles.column}>
                     <h4>Home</h4>
                     <ul>
-                    <li>Overview</li>
-                    <li>Benefits</li>
-                    <li>How it works</li>
-                    <li>Pricing</li>
+                    <a href="#features"><li>Overview</li></a>
+                    <a href="#how"><li>Benefits</li></a>
+                    <a href="#how"><li>How it works</li></a>
+                    {/* <li>Pricing</li> */}
                     </ul>
                 </div>
                 <div className={styles.column}>
