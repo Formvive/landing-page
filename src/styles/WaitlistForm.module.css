@@ -63,3 +63,27 @@
     flex-direction: row;
     text-wrap: nowrap;
 }
+@media screen and (max-width: 768px) {
+    .WaitlistSection {
+        padding: 4rem;
+    }
+    .WaitlistSection h2 {
+        font-size: 2.5rem;
+    }
+    .WaitlistSection p {
+        font-size: 1.5rem;
+    }
+    .WaitlistInput {
+        width: 100%;
+        flex-direction: column;
+        align-items: center;
+    }
+    .WaitlistInput input {
+        width: 100%;
+        margin-bottom: 1rem;
+    }
+    .WaitlistInput button {
+        width: 100%;
+    }
+    
+}
