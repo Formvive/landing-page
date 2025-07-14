@@ -6,7 +6,7 @@ export async function POST(request: Request) {
 
   try {
     const body = await request.json();
-    console.log("📩 [API] Request Body:", body);
+    // console.log("📩 [API] Request Body:", body);
 
     const { email, name, reason } = body;
 
@@ -20,10 +20,10 @@ export async function POST(request: Request) {
     const collection = db.collection("sign-ups");
 
     const existing = await collection.findOne({ email });
-    console.log("🔍 [API] Existing entry:", existing);
+    // console.log("🔍 [API] Existing entry:", existing);
 
     if (existing) {
-      console.log("🛑 [API] Email already signed up");
+      // console.log("🛑 [API] Email already signed up");
       return NextResponse.json({ message: "Already signed up" }, { status: 200 });
     }
 
@@ -34,8 +34,9 @@ export async function POST(request: Request) {
       createdAt: new Date(),
     };
 
-    const insertResult = await collection.insertOne(newEntry);
-    console.log("✅ [API] Inserted result:", insertResult);
+    // const insertResult = 
+    await collection.insertOne(newEntry);
+    // console.log("✅ [API] Inserted result:", insertResult);
 
     return NextResponse.json({ message: "Success" }, { status: 201 });
   } catch (error: unknown) {
