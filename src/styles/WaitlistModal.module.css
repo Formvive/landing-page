@@ -96,8 +96,67 @@
   .joinedImages img {
     margin-left: -6px;
   }
+  .spinner {
+    width: 20px;
+    height: 20px;
+    border: 3px solid #ccc;
+    border-top: 3px solid #000;
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    display: inline-block;
+  }
   
-  /* ✅ Responsive adjustments */
+  @keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+  }
+  
+  .successWrapper {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+    padding-top: 2rem;
+  }
+  
+  .successWrapper h2 {
+    font-size: 1.5rem;
+    font-weight: 500;
+    color: #222;
+  }
+  
+  .checkmarkWrapper {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #00c853;
+    position: relative;
+  }
+  
+  .checkmark {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 16px;
+    height: 32px;
+    border-right: 4px solid white;
+    border-bottom: 4px solid white;
+    transform: translate(-50%, -60%) rotate(45deg);
+    animation: checkFadeIn 0.4s ease-in forwards;
+  }
+  
+  @keyframes checkFadeIn {
+    0% {
+      opacity: 0;
+      transform: translate(-50%, -60%) rotate(30deg);
+    }
+    100% {
+      opacity: 1;
+      transform: translate(-50%, -60%) rotate(45deg);
+    }
+  }
+  
+  
   @media (max-width: 1024px) {
     .modal h1 {
       font-size: 3rem;
