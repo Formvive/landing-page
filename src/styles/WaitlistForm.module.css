@@ -61,6 +61,7 @@
     cursor: pointer;
     display: flex;
     flex-direction: row;
+    justify-content: center;
     text-wrap: nowrap;
 }
 @media screen and (max-width: 768px) {
