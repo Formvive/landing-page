@@ -47,6 +47,8 @@
   
   .inputGroup {
     display: flex;
+    flex-direction: column;
+    align-items: center;
     justify-content: center;
     align-items: stretch;
     gap: 0.5rem;
@@ -55,7 +57,13 @@
     width: 100%;
     max-width: 700px;
   }
-  
+  .inputGroup label {
+    font-size: 1.125rem;
+    text-align: start;
+    font-weight: 500;
+    color: #4b5563;
+    margin-bottom: 0.5rem;
+  }
   .input {
     flex: 1;
     min-width: 240px;
@@ -76,6 +84,8 @@
     border: none;
     cursor: pointer;
     white-space: nowrap;
+    width: max-content;
+    align-self: center;
   }
   
   .joined {
