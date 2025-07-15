@@ -1,3 +1,4 @@
+/* Already existing */
 .badge {
     display: flex;
     flex-direction: row;
@@ -11,30 +12,38 @@
     font-weight: 500;
     margin-bottom: 1rem;
 }
+
 .WaitlistSection {
     display: flex;
     flex-direction: column;
     align-items: center;
     padding: 9rem;
     background-color: #f9fafb;
+    text-align: center;
+    transition: all 0.3s ease-in-out;
 }
+
 .WaitlistSection h2 {
     font-size: 4rem;
     font-weight: 600;
-    text-align: center;
     max-width: 900px;
+    transition: opacity 0.3s ease;
 }
+
 .WaitlistSection p {
     font-size: 2rem;
     font-weight: 400;
-    text-align: center;
     max-width: 900px;
+    transition: opacity 0.3s ease;
 }
+
 .WaitlistSection span {
     font-size: 1.25rem;
     font-weight: 400;
-    text-align: center;
+    margin-top: 1rem;
+    color: #6b7280;
 }
+
 .WaitlistInput {
     border: 1px solid #2B2929;
     border-radius: 1rem;
@@ -45,46 +54,99 @@
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+    transition: all 0.3s ease;
 }
+
 .WaitlistInput input {
     width: 100%;
     border: none;
     outline: none;
+    padding: 10px;
+    font-size: 1rem;
+    border-radius: 8px;
+    background: white;
+    transition: background-color 0.3s ease;
 }
+
+.WaitlistInput input[disabled] {
+    background-color: #f0f0f0;
+    cursor: not-allowed;
+}
+
 .WaitlistInput button {
     background: #000;
     color: white;
     border: none;
-    padding: 10px;
+    padding: 10px 20px;
     border-radius: 6px;
     font-weight: bold;
     cursor: pointer;
-    display: flex;
-    flex-direction: row;
-    justify-content: center;
-    text-wrap: nowrap;
+    white-space: nowrap;
+    transition: background 0.3s ease;
 }
+
+.WaitlistInput button:disabled {
+    background: #999;
+    cursor: not-allowed;
+}
+.modalh1 {
+    font-size: 4rem;
+    font-weight: 600;
+    margin-bottom: 2rem;
+}
+
+.modalp {
+    font-size: 2rem;
+    font-weight: 400;
+    margin-bottom: 2rem;
+}
+/* Mobile */
 @media screen and (max-width: 768px) {
     .WaitlistSection {
-        padding: 4rem;
+        padding: 4rem 2rem;
     }
+
     .WaitlistSection h2 {
         font-size: 2.5rem;
     }
+
     .WaitlistSection p {
         font-size: 1.5rem;
     }
+
     .WaitlistInput {
         width: 100%;
         flex-direction: column;
-        align-items: center;
+        align-items: stretch;
     }
-    .WaitlistInput input {
-        width: 100%;
-        margin-bottom: 1rem;
-    }
+
+    .WaitlistInput input,
     .WaitlistInput button {
         width: 100%;
+        margin-bottom: 0.75rem;
     }
+    .modalh1 {
+        font-size: 2.25rem;
+      }
     
+      .modalp {
+        font-size: 1.125rem;
+      }
+}
+@media (max-width: 480px) {
+    .modalh1 {
+      font-size: 1.75rem;
+    }
+  
+    .modalp {
+      font-size: 1rem;
+    }
+  
+    .input {
+      font-size: 0.95rem;
+    }
+  
+    .submitBtn {
+      font-size: 0.95rem;
+    }
 }
