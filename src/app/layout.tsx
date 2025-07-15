@@ -13,8 +13,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "FORMVIVE",
-  description: "FORMVIVE",
+  title: "Formvive | Don’t ask more, Ask better",
+  description: "Faster, smarter Feedback for Modern Product Teams",
 };
 
 export default function RootLayout({
