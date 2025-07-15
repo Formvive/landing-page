@@ -32,7 +32,7 @@ export default function WaitlistForm() {
 
       setStep("success");
     } catch (err) {
-      alert("Something went wrong. Please try again.");
+      alert("Something went wrong. Please try again." + err);
     } finally {
       setIsLoading(false);
     }
@@ -48,7 +48,7 @@ export default function WaitlistForm() {
       {step === "success" ? (
         <>
           <h2 className="text-2xl font-bold mb-4">All done, thank you!</h2>
-          <p className="text-gray-600">You're officially on the waitlist 🎉</p>
+          <p className="text-gray-600">You&apos;re officially on the waitlist 🎉</p>
         </>
       ) : step === "email" ? (
         <>
