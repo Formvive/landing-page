@@ -41,9 +41,9 @@ export default function Hero() {
 
           <ul className={styles.menuList}>
             <li><Link href="/" className={styles.active}>Home</Link></li>
-            <li><Link href="/product">Product</Link></li>
-            <li><Link href="/pricing">Pricing</Link></li>
-            <li><Link href="/login">Login</Link></li>
+            <li><Link href="/">Product</Link></li>
+            <li><Link href="/">Pricing</Link></li>
+            <li><Link href="/">Login</Link></li>
           </ul>
         </div>
 
