@@ -21,6 +21,9 @@
   gap: 12rem;
   max-width: max-content;
 }
+.topBarMobile {
+  display: none;
+}
 .topBar span {
   font-size: 1rem;
   font-weight: 800;
@@ -54,10 +57,11 @@
   gap: 1rem;
   max-width: max-content;
   font-size: 0.75rem;
-  background: #f5f5f5;
+  background: transparent;
+  border: 1px solid #E0E0E0;
   color: #333;
   padding: 0.4rem 0.75rem;
-  border-radius: 999px;
+  border-radius: 10px;
   font-weight: 500;
   margin: 2.5rem;
 }
@@ -114,6 +118,65 @@
   color: #ccc;
   max-width: 100%;
   margin: 0 auto;
+}
+.offcanvas {
+  position: fixed;
+  top: 0;
+  right: -100%;
+  height: 100%;
+  width: 260px;
+  background: white;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.15);
+  transition: right 0.3s ease;
+  z-index: 1002;
+  display: flex;
+  flex-direction: column;
+  padding: 2rem 1rem;
+}
+
+.offcanvas.show {
+  right: 0;
+}
+
+.closeBtn {
+  align-self: flex-end;
+  font-size: 2rem;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+.menuList {
+  margin-top: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  list-style: none;
+  padding: 0;
+  align-items: flex-start;
+}
+.menuList li {
+  width: 100%;
+}
+.menuList li a {
+  display: flex;
+  text-decoration: none;
+  color: #111;
+  font-weight: 500;
+  width: 100%;
+  border-bottom: 1px solid #eee;
+  padding-bottom: 0.5rem;
+}
+
+.menuList li a.active {
+  font-weight: 700;
+}
+
+.overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 1000;
 }
 @media (max-width: 1200px) {
   .hero h1 {
@@ -186,28 +249,71 @@
 }
 
 @media (max-width: 480px) {
+  .topBar {
+    display: none;
+  }
+  .topBarMobile {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    font-size: 0.9rem;
+    width: 100%;
+  }
+  .topBarMobile span{
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+  .topBarMobile .actions {
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
+    align-items: center;
+    justify-content: flex-end;
+  }
+  .topBarMobile .cta {
+    padding: 0.5rem 1rem;
+    background-color: #2B2929;
+    color: #fff;
+  }
+  .topBarMobile .actions img {
+    width: 40px;
+    padding: 10px 5px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+  }
   .hero h1 {
     font-size: 1.75rem;
   }
 
   .hero p {
-    font-size: 1rem;
+    font-size: .875rem;
+    font-weight: normal;
   }
-
+  .videoPreview {
+    margin-top: 2rem;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
   .videoWrapper {
     padding: 1.5rem 0.5rem;
-    padding-top: 14rem;
+    padding-top: 7rem;
+    width: 100%;
   }
 
   .videoPreview img {
-    margin-bottom: -18rem;
+    margin-bottom: -8rem;
+    width: 20rem;
+    z-index: 2;
   }
 
   .caption {
-    font-size: 0.875rem;
-  }
-
-  .topBar {
-    gap: 1rem;
+    font-size: 0.5rem;
+    padding: .125rem 1rem;
   }
 }

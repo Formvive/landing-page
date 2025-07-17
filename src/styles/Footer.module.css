@@ -186,4 +186,10 @@
   .socialIcons a {
     margin-right: 0.5rem;
   }
+  .center {
+    display: flex;
+    flex-direction: row;
+    gap: 1.5rem;
+    align-items: flex-start;
+  }
 }

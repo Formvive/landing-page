@@ -6,6 +6,7 @@ import Image from "next/image";
 
 
 export default function Hero() {
+  const [isOpen, setIsOpen] = useState(false);
   const [showModal, setShowModal] = useState(false);
 
   return (
@@ -21,6 +22,33 @@ export default function Hero() {
           <button>Login</button>
           <button className={styles.cta}>Get Started</button>
         </div>
+      </div>
+      <div className={styles.topBarMobile}>
+        <span>FORMVIVE</span>
+        <div className={styles.actions}>
+          <button className={styles.cta}>Get Started</button>
+          <button onClick={() => setIsOpen(true)}aria-label="Open menu"><Image src="/assets/icons/burger.svg" alt="mobile menu button" width={30} height={20} /></button>
+        </div>
+
+        <div className={`${styles.offcanvas} ${isOpen ? styles.show : ''}`}>
+          <button
+            className={styles.closeBtn}
+            onClick={() => setIsOpen(false)}
+            aria-label="Close menu"
+          >
+            &times;
+          </button>
+
+          <ul className={styles.menuList}>
+            <li><a href="/" className={styles.active}>Home</a></li>
+            <li><a href="/product">Product</a></li>
+            <li><a href="/pricing">Pricing</a></li>
+            <li><a href="/login">Login</a></li>
+          </ul>
+        </div>
+
+        {/* Optional: overlay to dim background */}
+        {isOpen && <div className={styles.overlay} onClick={() => setIsOpen(false)} />}
       </div>
       <a href="#WaitlistSection" ><div className={styles.badge}><Image src="/assets/icons/light.svg" alt="how it works" width={20} height={20} />Join the waitlist for updates<Image src="/assets/icons/arr.svg" alt="how it works" width={20} height={20} /></div></a>
 
