@@ -3,7 +3,7 @@ import { useState } from "react";
 import WaitlistModal from "../components/WaitlistModal";
 import styles from "@/styles/Hero.module.css";
 import Image from "next/image";
-
+import Link from 'next/link';
 
 export default function Hero() {
   const [isOpen, setIsOpen] = useState(false);
@@ -40,10 +40,10 @@ export default function Hero() {
           </button>
 
           <ul className={styles.menuList}>
-            <li><a href="/" className={styles.active}>Home</a></li>
-            <li><a href="/product">Product</a></li>
-            <li><a href="/pricing">Pricing</a></li>
-            <li><a href="/login">Login</a></li>
+            <li><Link href="/" className={styles.active}>Home</Link></li>
+            <li><Link href="/product">Product</Link></li>
+            <li><Link href="/pricing">Pricing</Link></li>
+            <li><Link href="/login">Login</Link></li>
           </ul>
         </div>
 
