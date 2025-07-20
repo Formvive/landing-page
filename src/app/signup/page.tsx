@@ -131,7 +131,7 @@ export default function SignUpPage() {
                     type="button"
                     onClick={() => setPasswordVisible(!passwordVisible)}
                   >
-                    👁️
+                    <Image src='/assets/icons/eye.svg' alt="reveal password button" width={20} height={15}/>
                   </button>
                 </div>
               </div>
@@ -151,7 +151,7 @@ export default function SignUpPage() {
                       setConfirmPasswordVisible(!confirmPasswordVisible)
                     }
                   >
-                    👁️
+                    <Image src='/assets/icons/eye.svg' alt="reveal password button" width={20} height={15}/>
                   </button>
                 </div>
               </div>

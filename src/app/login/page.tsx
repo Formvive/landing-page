@@ -29,7 +29,7 @@ export default function LoginPage() {
                     type="button"
                     onClick={() => setPasswordVisible(!passwordVisible)}
                     >
-                    👁️
+                    <Image src='/assets/icons/eye.svg' alt="reveal password button" width={20} height={15}/>
                     </button>
                 </div>
                 <button
