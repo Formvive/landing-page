@@ -63,12 +63,14 @@
     border: none;
     outline: none;
     padding: 10px;
-    font-size: 1rem;
+    font-size: .81rem;
     border-radius: 8px;
     background: white;
     transition: background-color 0.3s ease;
 }
-
+.WaitlistInput input:placeholder-shown {
+    font-size: .8rem;
+}
 .WaitlistInput input[disabled] {
     background-color: #f0f0f0;
     cursor: not-allowed;
@@ -87,7 +89,6 @@
 }
 
 .WaitlistInput button:disabled {
-    background: #999;
     cursor: not-allowed;
 }
 .modalh1 {
