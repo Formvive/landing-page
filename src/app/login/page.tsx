@@ -18,12 +18,13 @@ export default function LoginPage() {
                 <input
                     type="text"
                     placeholder="Username"
-                    className="w-full px-3 py-2 border border-gray-300 rounded"
+                    className="loginFormInput w-full px-3 py-2 border border-gray-300 rounded"
                 />
                 <div className="password">
                     <input
                     type={passwordVisible ? 'text' : 'password'}
                     placeholder="Password"
+                    className='loginFormInput'
                     />
                     <button
                     type="button"
@@ -40,7 +41,7 @@ export default function LoginPage() {
                 </button>
                 <div className="flex items-center justify-between text-sm">
                     <label className="flex items-center space-x-2">
-                    <input type="checkbox" className="rounded border-gray-300" />
+                    <input type="checkbox" className="rounded border-gray-300 w-max" />
                     <span>Keep me signed in</span>
                     </label>
                     <a href="#" className="hover:underline">
