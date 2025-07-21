@@ -54,14 +54,14 @@ export default function LoginPage() {
                 <Image src="/assets/icons/goog.png" alt="Google" width={20} height={20} className="mr-2" />
                 Sign up with Google
             </button>
-            <button>
+            {/* <button>
                 <Image src="/assets/icons/git.png" alt="GitHub" width={20} height={20} className="mr-2" />
                 Sign up with GitHub
             </button>
             <button>
                 <Image src="/assets/icons/linkd.png" alt="LinkedIn" width={20} height={20} className="mr-2" />
                 Sign up with Linkedin
-            </button>
+            </button> */}
             </div>
             <p className="text-center text-sm text-gray-600 mt-6">
             Don’t have an account?{' '}

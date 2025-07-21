@@ -13,14 +13,14 @@ export default function Hero() {
     <>
       <div className={styles.topBar}>
         <div className={styles.actions}>
-          <a href="#how"><button className={styles.cta}>Benefits</button></a>
-          <a href="#features"><span>Product</span></a>
+          <a href="#features"><button className={styles.cta}>Benefits</button></a>
+          <a href="#how"><span>Product</span></a>
           {/* <a href="#benefits"><span>Pricing</span></a> */}
         </div>
         <span>FORMVIVE</span>
         <div className={styles.actions}>
           <Link href={"/login"}><button>Login</button></Link>
-          <button className={styles.cta}>Get Started</button>
+          <Link href={"/signup"}><button className={styles.cta}>Get Started</button></Link>
         </div>
       </div>
       <div className={styles.topBarMobile}>
