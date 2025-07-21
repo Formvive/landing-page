@@ -1,33 +1,53 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import './page.css';
+// import PasswordStrengthBar from 'react-password-strength-bar';
 
 export default function SignUpPage() {
   const router = useRouter();
 
-  const [firstName, setFirstName]   = useState('');
-  const [lastName, setLastName]     = useState('');
-  const [email, setEmail]           = useState('');
-  const [password, setPassword]     = useState('');
+  const [firstName, setFirstName] = useState('');
+  const [lastName, setLastName]   = useState('');
+  const [email, setEmail]         = useState('');
+  const [password, setPassword]   = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [termsAccepted, setTermsAccepted]     = useState(false);
+  const [consented, setConsented]     = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
-
+  const [passwordScore, setPasswordScore] = useState(0);
+  const [passwordFeedback, setPasswordFeedback] = useState<string[]>([]);  
   const [loading, setLoading] = useState(false);
   const [error, setError]     = useState('');
   const [success, setSuccess] = useState('');
+  const [emailError, setEmailError] = useState('');
+  // const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  
+  const passwordRules = {
+    length: password.length >= 6,
+    upper: /[A-Z]/.test(password),
+    lower: /[a-z]/.test(password),
+    number: /[0-9]/.test(password),
+  };
+  
+  const isPasswordValid = Object.values(passwordRules).every(Boolean);
+  const isPasswordMatch = password === confirmPassword;
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setEmail(val);
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    setEmailError(regex.test(val) ? '' : 'Please enter a valid email');
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     setError('');
     setSuccess('');
 
-    if (password !== confirmPassword) {
+    if (!isPasswordMatch) {
       setError('Passwords do not match');
       return;
     }
@@ -36,6 +56,7 @@ export default function SignUpPage() {
       setError('You must accept the terms');
       return;
     }
+    if (emailError) return setError('Please fix your email address');
 
     setLoading(true);
 
@@ -43,11 +64,7 @@ export default function SignUpPage() {
       const response = await fetch('https://form-vive-server.onrender.com/api/v1/auth/sign-up', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          email,
-          password,
-          termsAccepted
-        }),
+        body: JSON.stringify({ email, password, termsAccepted, consented, firstName, lastName }),
       });
 
       const data = await response.json();
@@ -57,17 +74,16 @@ export default function SignUpPage() {
       } else {
         setSuccess(data.message || 'Sign up successful!');
         localStorage.setItem('token', data.token);
-
-        // Redirect to onboarding
         router.push('/onboarding');
 
-        // Clear form (optional)
+        // Clear form
         setFirstName('');
         setLastName('');
         setEmail('');
         setPassword('');
         setConfirmPassword('');
         setTermsAccepted(false);
+        setConsented(false);
       }
     } catch (err) {
       console.error(err);
@@ -76,7 +92,25 @@ export default function SignUpPage() {
       setLoading(false);
     }
   };
-
+  // Lazy-load zxcvbn only when password changes
+  useEffect(() => {
+    if (!password) {
+      setPasswordScore(0);
+      setPasswordFeedback([]);
+      return;
+    }
+  
+    const evaluatePassword = async () => {
+      const zxcvbn = (await import('zxcvbn')).default;
+      const result = zxcvbn(password);
+      setPasswordScore(result.score);
+      setPasswordFeedback(result.feedback.suggestions || []);
+    };
+  
+    evaluatePassword();
+  }, [password]);
+  const hidePasswordHints = password === '' || (passwordScore >= 4 && isPasswordMatch);
+  
   return (
     <div className="flex items-center justify-center min-h-screen bg-white">
       <div className="signUpPage">
@@ -96,6 +130,7 @@ export default function SignUpPage() {
                 className="border border-gray-300 rounded"
               />
             </div>
+
             <div className="inputGroup">
               <label>Last Name</label>
               <input
@@ -106,18 +141,19 @@ export default function SignUpPage() {
                 className="border border-gray-300 rounded"
               />
             </div>
+
             <div className="inputGroup">
               <label>Email Address</label>
               <input
                 type="email"
                 placeholder="Enter your email address"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={handleEmailChange}
                 className="border border-gray-300 rounded"
               />
+              {emailError && <p className="text-red-500 text-xs mt-1">{emailError}</p>}
             </div>
-
-            <div className="flex flex-row justify-between gap-5">
+            <div className='passwordBlock'>
               <div className="passwordRow">
                 <label>Password</label>
                 <div className="password">
@@ -134,8 +170,21 @@ export default function SignUpPage() {
                     <Image src='/assets/icons/eye.svg' alt="reveal password button" width={20} height={15}/>
                   </button>
                 </div>
-              </div>
+                <div className="mt-2">
+                  <div className="w-full h-2 bg-gray-200 rounded">
+                    <div
+                      className={`h-2 rounded transition-all duration-300 ${
+                        passwordScore === 0 ? 'w-1/5 bg-red-500' :
+                        passwordScore === 1 ? 'w-2/5 bg-orange-500' :
+                        passwordScore === 2 ? 'w-3/5 bg-yellow-500' :
+                        passwordScore === 3 ? 'w-4/5 bg-blue-500' :
+                        'w-full bg-green-600'
+                      }`}
+                    ></div>
+                  </div>
+                </div>
 
+              </div>
               <div className="passwordRow">
                 <label>Confirm Password</label>
                 <div className="password">
@@ -147,51 +196,79 @@ export default function SignUpPage() {
                   />
                   <button
                     type="button"
-                    onClick={() =>
-                      setConfirmPasswordVisible(!confirmPasswordVisible)
-                    }
+                    onClick={() => setConfirmPasswordVisible(!confirmPasswordVisible)}
                   >
                     <Image src='/assets/icons/eye.svg' alt="reveal password button" width={20} height={15}/>
                   </button>
                 </div>
+                {!isPasswordMatch && confirmPassword && (
+                  <p className="text-red-500 text-xs mt-1 ml-1">Passwords do not match</p>
+                )}
               </div>
             </div>
+            {!hidePasswordHints && (
+              <>
+                <ul className="text-xs mt-2 ml-1 space-y-1 text-gray-600 grid justify-items-start grid-cols-2">
+                  <li className={passwordRules.length ? 'text-green-600' : ''}>• At least 6 characters</li>
+                  <li className={passwordRules.upper ? 'text-green-600' : ''}>• At least one uppercase letter</li>
+                  <li className={passwordRules.lower ? 'text-green-600' : ''}>• At least one lowercase letter</li>
+                  <li className={passwordRules.number ? 'text-green-600' : ''}>• At least one number</li>
+                </ul>
 
-            <button
-              type="submit"
-              className="signUpBtn"
-              disabled={loading}
-            >
-              {loading ? 'Signing up...' : 'Sign up'}
-            </button>
+                <div className="text-xs text-gray-600 mt-1">
+                  {passwordFeedback.length > 0
+                    ? passwordFeedback.map((msg, i) => (
+                        <p key={i} className="text-red-500">• {msg}</p>
+                      ))
+                    : <p className="text-green-600">Your password looks good!</p>}
+                </div>
+              </>
+            )}
 
-            <div className="flex items-center text-sm termsCheckbox">
+            <div className="flex items-center text-sm mt-4 termsCheckbox">
               <input
                 type="checkbox"
                 checked={termsAccepted}
                 onChange={(e) => setTermsAccepted(e.target.checked)}
-                className="rounded border-gray-300"
+                className="rounded border-gray-300 w-4 h-4 md:w-6 md:h-6"
               />
               <span className="ml-2">I agree to the Terms and Privacy Policy</span>
             </div>
+            <div className="flex items-center text-sm mt-4 termsCheckbox">
+              <input
+                type="checkbox"
+                checked={consented}
+                onChange={(e) => setConsented(e.target.checked)}
+                className="rounded border-gray-300 w-4 h-4 md:w-6 md:h-6"
+              />
+              <span className="ml-2">I consent to be contacted for marketing purposes, perks and offers by Formvive.com</span>
+            </div>
+
+            <button
+              type="submit"
+              className="signUpBtn mt-4"
+              disabled={loading || !isPasswordValid}
+            >
+              {loading ? 'Signing up...' : 'Get started'}
+            </button>
           </form>
 
           {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
           {success && <p className="text-green-500 text-sm mt-2">{success}</p>}
 
-          <div className="signUpBtns">
+          <div className="signUpBtns mt-4">
             <button>
               <Image src="/assets/icons/goog.png" alt="Google" width={20} height={20} />
-              Sign up with Google
+              Get started with Google
             </button>
-            <button>
+            {/* <button>
               <Image src="/assets/icons/git.png" alt="GitHub" width={20} height={20} />
               Sign up with GitHub
             </button>
             <button>
               <Image src="/assets/icons/linkd.png" alt="LinkedIn" width={20} height={20} />
-              Sign up with Linkedin
-            </button>
+              Sign up with LinkedIn
+            </button> */}
           </div>
 
           <p className="text-center text-sm text-gray-600 mt-6">

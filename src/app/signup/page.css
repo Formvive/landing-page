@@ -141,11 +141,21 @@
     .signUpBlock {
       padding: 2.5rem 3rem;
     }
+    .passwordBlock {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
   }
   
   @media (min-width: 1024px) {
     .signUpPage h1 {
       font-size: 3rem;
+    }
+    .passwordBlock {
+      display: flex;
+      flex-direction: row;
+      gap: 1rem;
     }
   }
   

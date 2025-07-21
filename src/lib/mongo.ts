@@ -9,7 +9,6 @@ let clientPromise: Promise<MongoClient>;
 // Extend NodeJS global type to safely store the client promise
 declare global {
   // Allow reuse in development
-  // eslint-disable-next-line no-var
   var _mongoClientPromise: Promise<MongoClient> | undefined;
 }
 
