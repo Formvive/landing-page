@@ -1,5 +1,8 @@
 import styles from "@/styles/Features.module.css";
 import Image from "next/image";
+import { Inter } from 'next/font/google';
+
+const inter = Inter({ subsets: ['latin'], weight: ['400', '600'] });
 
 export default function Features() {
   const features = [
@@ -42,15 +45,18 @@ export default function Features() {
   return (
     <section className={styles.features} id="features">
       <div className={styles.badge}><Image src="/assets/icons/features.svg" alt="how it works" width={20} height={20} /> Unique Features</div>
-      <h2>Built for teams validating products, ideas & markets.</h2>
-      <p className={styles.subtitle}>
+      <h2 className={inter.className}>Built for teams validating products, ideas & markets.</h2>
+      <p className={styles.subtitle}><span className={inter.className}>
         The hyper-intelligent platform to build forms, share them, and collect real + predicted responses instantly.
+        </span>
       </p>
 
       <div className={styles.cards}>
         {features.map((feature, i) => (
           <div key={i} className={styles.card}>
-            <Image src={feature.icon} alt="how it works" width={40} height={40} />
+            <div className={styles.icon}>
+              <Image src={feature.icon} alt="how it works" width={28} height={28} />
+            </div>
             <h3>{feature.title}</h3>
             <p>{feature.description}</p>
           </div>

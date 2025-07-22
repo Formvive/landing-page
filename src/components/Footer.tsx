@@ -9,7 +9,7 @@ export default function Footer() {
             <div className={styles.container}>
                 <div className={styles.left}>
                 <h3>FormVive</h3>
-                <p>
+                <p className="text-center">
                     Formvive makes feedback effortless and insights actionable.  short, clear, covers your why.
                 </p>
                 <a href="mailto:hello@formvive.com" className={styles.email}>
@@ -67,7 +67,7 @@ export default function Footer() {
             </div>
 
             <div className={styles.bottom}>
-                <p>Copyright ©2023 FormVive.com</p>
+                <p>Copyright ©2025 Formvive.com</p>
                 <p>Privacy Policy</p>
             </div>
         </div>

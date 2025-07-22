@@ -3,10 +3,12 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { BiLeftArrow } from 'react-icons/bi';
 import './page.css';
 // import PasswordStrengthBar from 'react-password-strength-bar';
 
 export default function SignUpPage() {
+  
   const router = useRouter();
 
   const [firstName, setFirstName] = useState('');
@@ -74,7 +76,7 @@ export default function SignUpPage() {
       } else {
         setSuccess(data.message || 'Sign up successful!');
         localStorage.setItem('token', data.token);
-        router.push('/onboarding');
+        router.push('/'); // Redirect to verification page
 
         // Clear form
         setFirstName('');
@@ -112,19 +114,24 @@ export default function SignUpPage() {
   const hidePasswordHints = password === '' || (passwordScore >= 4 && isPasswordMatch);
   
   return (
-    <div className="flex items-center justify-center min-h-screen bg-white">
+    <div className="flex flex-col items-center min-h-screen bg-white">
       <div className="signUpPage">
-        <h1>Formvive</h1>
+      <div className="Navbar">
+        <div className="left">
+          <button onClick={() => router.back()}><BiLeftArrow size={40} /></button>
+        </div>
+        <h1 className="title">Formvive</h1>
+        <div className="right">{/* Empty space to balance layout */}</div>
+      </div>
+          
         <div className="signUpBlock">
-          <h2 className="font-medium">Sign Up</h2>
-          <p className="text-center">Create your account and get started</p>
-
+          <h2 className="font-medium">Create your account and get started</h2>
           <form className="signUpForm" onSubmit={handleSubmit}>
             <div className="inputGroup">
               <label>First Name</label>
               <input
                 type="text"
-                placeholder="Enter your firstname"
+                placeholder="Enter your first name"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 className="border border-gray-300 rounded"
@@ -135,7 +142,7 @@ export default function SignUpPage() {
               <label>Last Name</label>
               <input
                 type="text"
-                placeholder="Enter your lastname"
+                placeholder="Enter your last name"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 className="border border-gray-300 rounded"

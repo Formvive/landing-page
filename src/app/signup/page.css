@@ -6,11 +6,32 @@
     width: 100%;
     padding: 4rem 1rem; /* mobile-first padding */
   }
+  .Navbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 5rem;
+    width: 100%;
+    position: relative;
+  }
+  
+  .Navbar .left,
+  .Navbar .right {
+    flex: 1;
+    display: flex;
+    align-items: center;
+  }
+  
+  .Navbar .title {
+    text-align: center;
+    font-size: 4.5rem;
+    font-weight: bold;
+    flex: 0;
+  }
   
   .signUpPage h1 {
     font-size: 2.5rem;
     font-weight: 800;
-    margin-bottom: 2rem;
     text-align: center;
   }
   
@@ -22,22 +43,13 @@
     max-width: 40rem;
     padding: 2rem;
     border-radius: 0.75rem;
-    box-shadow: 0 0 20px rgba(0, 0, 0, 0.05);
   }
   
   .signUpBlock h2 {
-    font-size: 1.5rem;
-    margin-bottom: 0.5rem;
-    text-align: center;
-  }
-  
-  .signUpBlock p {
-    font-size: 1rem;
-    color: #6a7282;
+    font-size: 2rem;
     margin-bottom: 1.5rem;
     text-align: center;
   }
-  
   .signUpForm {
     display: flex;
     flex-direction: column;

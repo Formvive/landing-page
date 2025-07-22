@@ -5,6 +5,7 @@ import styles from "@/styles/WaitlistForm.module.css";
 import style from "@/styles/WaitlistModal.module.css";
 import Image from "next/image";
 
+
 export default function WaitlistForm() {
   const [step, setStep] = useState<"email" | "details" | "success">("email");
   const [email, setEmail] = useState("");

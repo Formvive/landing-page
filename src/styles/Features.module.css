@@ -1,5 +1,5 @@
 .features {
-  padding: 4rem 2rem;
+  padding: 0rem 2rem;
   text-align: center;
   background: #fff;
   display: flex;  
@@ -18,23 +18,23 @@
   background: transparent;
   border: 1px solid #E0E0E0;
   color: #333;
-  padding: 0.4rem 0.75rem;
+  padding: 0.46875rem;
   border-radius: 10px;
   font-weight: 500;
-  margin: 2.5rem;
+  margin: 5.78125rem 0 1.5rem 0;
 }
 
 .features h2 {
   font-size: 4rem;
   font-weight: 700;
-  margin-bottom: 0.5rem;
+  margin-bottom: 2rem;
   max-width: 900px;
 }
 
 .subtitle {
   font-size: 2rem;
-  color: #666;
-  margin-bottom: 3rem;
+  color: #000;
+  margin-bottom: 2rem;
   max-width: 900px;
 }
 
@@ -47,11 +47,12 @@
 }
 
 .card {
-  background: #fafafa;
+  background: #fff;
   padding: 1.75rem;
   border-radius: 16px;
+  border: #f6f6f6 solid 1px;
   text-align: left;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.03);
+  /* box-shadow: 0 8px 24px rgba(0, 0, 0, 0.03); */
   transition: transform 0.2s ease;
 }
 
@@ -61,8 +62,9 @@
 
 .icon {
   font-size: 1.5rem;
-  background: #f0f0f0;
+  background: #fff;
   padding: 0.75rem;
+  border: #E9EBF1 solid 1px;
   border-radius: 999px;
   display: inline-block;
   margin-bottom: 1rem;

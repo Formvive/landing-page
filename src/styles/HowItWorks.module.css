@@ -1,5 +1,5 @@
 .how {
-  padding: 4rem 2rem;
+  padding: 0rem 2rem;
   background: #fff;
   text-align: center;
   display: flex;  
@@ -22,10 +22,10 @@
   background: transparent;
   border: 1px solid #E0E0E0;
   color: #333;
-  padding: 0.4rem 0.75rem;
+  padding: 0.46875rem;
   border-radius: 10px;
   font-weight: 500;
-  margin: 2.5rem;
+  margin: 5.78125rem 0 1.5rem 0;
 }
 
 .subtitle {
