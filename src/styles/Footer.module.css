@@ -140,7 +140,7 @@
   }
 
   .center {
-    flex-direction: column;
+    flex-direction: row;
     gap: 1.5rem;
     width: 100%;
     justify-content: space-around;

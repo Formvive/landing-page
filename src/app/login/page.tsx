@@ -5,6 +5,8 @@ import Image from 'next/image';
 import './page.css';
 import { BiLeftArrow } from 'react-icons/bi';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
+
 
 
 export default function LoginPage() {
@@ -12,13 +14,13 @@ export default function LoginPage() {
   const [passwordVisible, setPasswordVisible] = useState(false);
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-white">
+    <div className="flex flex-col items-center min-h-screen bg-white w-full">
       <div className="loginPage">
       <div className="Navbar">
         <div className="left">
           <button onClick={() => router.back()}><BiLeftArrow size={40} /></button>
         </div>
-        <h1 className="title">Formvive</h1>
+        <Link href={'/'}><h1 className="title">Formvive</h1></Link>
         <div className="right">{/* Empty space to balance layout */}</div>
       </div>
         <div className='loginBlock'>

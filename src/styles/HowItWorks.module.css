@@ -110,8 +110,8 @@
   }
 
   .steps {
-    grid-template-columns: 1fr 1fr;
-    gap: 1.25rem;
+    display: flex;
+    flex-direction: row;
   }
 
   .card {
@@ -137,7 +137,7 @@
   }
 
   .steps {
-    grid-template-columns: 1fr;
+    flex-direction: column;
   }
 
   .badge {

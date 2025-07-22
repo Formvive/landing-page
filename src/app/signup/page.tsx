@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { BiLeftArrow } from 'react-icons/bi';
 import './page.css';
+import Link from 'next/link';
 // import PasswordStrengthBar from 'react-password-strength-bar';
 
 export default function SignUpPage() {
@@ -114,13 +115,13 @@ export default function SignUpPage() {
   const hidePasswordHints = password === '' || (passwordScore >= 4 && isPasswordMatch);
   
   return (
-    <div className="flex flex-col items-center min-h-screen bg-white">
+    <div className="flex flex-col items-center min-h-screen bg-white w-full">
       <div className="signUpPage">
       <div className="Navbar">
         <div className="left">
           <button onClick={() => router.back()}><BiLeftArrow size={40} /></button>
         </div>
-        <h1 className="title">Formvive</h1>
+        <Link href={'/'}><h1 className="title">Formvive</h1></Link>
         <div className="right">{/* Empty space to balance layout */}</div>
       </div>
           
