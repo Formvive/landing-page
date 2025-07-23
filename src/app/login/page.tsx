@@ -7,11 +7,64 @@ import { BiLeftArrow } from 'react-icons/bi';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 
-
-
 export default function LoginPage() {
-    const router = useRouter();
+  const router = useRouter();
+  const [email, setEmail] = useState('');
+  const [emailError, setEmailError] = useState('');
+  const [password, setPassword] = useState('');
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+
+  const handleEmailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value;
+    setEmail(val);
+    const regex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    setEmailError(regex.test(val) ? '' : 'Please enter a valid email');
+    console.log(emailError);
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      const res = await fetch('https://form-vive-server.onrender.com/api/v1/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        throw new Error(data.message || 'Login failed');
+      }
+      if (data.message?.toLowerCase().includes('verify')) {
+        router.push(`/verify-email?email=${encodeURIComponent(email)}`);
+        return;
+      }
+
+      // Store token
+      localStorage.setItem('authToken', data.token);
+
+      // Redirect after login
+      router.push('/onboarding');
+    } catch (err: unknown) {
+      if (err instanceof Error) {
+        setError(err.message);
+        console.log(err);
+      } else {
+        setError('An unexpected error occurred.');
+        console.log(err);
+      }
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="flex flex-col items-center min-h-screen bg-white w-full">
@@ -28,14 +81,18 @@ export default function LoginPage() {
             <p className="text-center">Welcome Back</p>
             <form className="loginForm">
                 <input
-                    type="text"
-                    placeholder="Username"
+                    type="email"
+                    placeholder="Email"
+                    value={email}
+                    onChange={handleEmailChange}
                     className="loginFormInput w-full px-3 py-2 border border-gray-300 rounded"
                 />
                 <div className="password">
                     <input
                     type={passwordVisible ? 'text' : 'password'}
                     placeholder="Password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
                     className='loginFormInput'
                     />
                     <button
@@ -47,10 +104,13 @@ export default function LoginPage() {
                 </div>
                 <button
                     type="submit"
+                    onClick={handleLogin}
+                    disabled={loading}
                     className="w-full py-2 font-semibold text-white bg-black rounded"
                 >
-                    Login
+                    {loading ? 'Logging in...' : 'Login'}
                 </button>
+                {error && <p className="text-red-500 text-sm text-center">{error}</p>}
                 <div className="flex items-center justify-between text-sm">
                     <label className="flex items-center space-x-2">
                     <input type="checkbox" className="rounded border-gray-300 w-max" />

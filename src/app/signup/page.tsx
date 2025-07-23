@@ -77,8 +77,9 @@ export default function SignUpPage() {
       } else {
         setSuccess(data.message || 'Sign up successful!');
         localStorage.setItem('token', data.token);
-        router.push('/'); // Redirect to verification page
-
+        const redirectUrl = `/auth/verify-email?token=${data.token}&email=${encodeURIComponent(data.email)}`;
+        router.push(redirectUrl);
+        
         // Clear form
         setFirstName('');
         setLastName('');
@@ -135,6 +136,8 @@ export default function SignUpPage() {
                 placeholder="Enter your first name"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
+                name="firstname"
+                autoComplete="firstname"
                 className="border border-gray-300 rounded"
               />
             </div>
@@ -146,6 +149,8 @@ export default function SignUpPage() {
                 placeholder="Enter your last name"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
+                name="last-name"
+                autoComplete='last-name'
                 className="border border-gray-300 rounded"
               />
             </div>
@@ -157,6 +162,8 @@ export default function SignUpPage() {
                 placeholder="Enter your email address"
                 value={email}
                 onChange={handleEmailChange}
+                name='email'
+                autoComplete="email"
                 className="border border-gray-300 rounded"
               />
               {emailError && <p className="text-red-500 text-xs mt-1">{emailError}</p>}
@@ -170,6 +177,8 @@ export default function SignUpPage() {
                     placeholder="Enter your password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
+                    name='password'
+                    autoComplete="new-password"
                   />
                   <button
                     type="button"
@@ -201,6 +210,8 @@ export default function SignUpPage() {
                     placeholder="Confirm your password"
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
+                    name='confirm-password'
+                    autoComplete="new-password"
                   />
                   <button
                     type="button"
