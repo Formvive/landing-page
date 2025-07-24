@@ -67,7 +67,7 @@ export default function SignUpPage() {
       const response = await fetch('https://form-vive-server.onrender.com/api/v1/auth/sign-up', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, termsAccepted, consented, firstName, lastName }),
+        body: JSON.stringify({ email, password, confirmPassword, termsAccepted, consented, firstName, lastName }),
       });
 
       const data = await response.json();

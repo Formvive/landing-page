@@ -23,7 +23,7 @@ export default function VerifyEmailContent() {
         const res = await fetch('https://api.formvive.com/auth/verify-email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ token }),
+          body: JSON.stringify({ token: token }),
         });
 
         if (res.ok) {
@@ -46,13 +46,6 @@ export default function VerifyEmailContent() {
   const handleResend = async () => {
     if (!resendEmail) return;
 
-    const token = localStorage.getItem('token');
-    if (!token) {
-      console.warn('No token in localStorage');
-      setResendStatus('failed');
-      return;
-    }
-
     setResendStatus('sending');
 
     try {
@@ -60,11 +53,13 @@ export default function VerifyEmailContent() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`,
         },
-        body: JSON.stringify({ email: resendEmail }),
+        body: JSON.stringify({ email: resendEmail}),
       });
-
+      console.log('Resend response:', res);
+      const text = await res.text();
+      console.log('✅ Resend response status:', res.status);
+      console.log('📩 Resend response body:', text);
       setResendStatus(res.ok ? 'sent' : 'failed');
     } catch {
       setResendStatus('failed');
