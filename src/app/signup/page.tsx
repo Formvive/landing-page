@@ -77,8 +77,9 @@ export default function SignUpPage() {
       } else {
         setSuccess(data.message || 'Sign up successful!');
         localStorage.setItem('token', data.token);
-        const redirectUrl = `/auth/verify-email?email=${encodeURIComponent(data.email)}`;
-        router.push(redirectUrl);
+        // const redirectUrl = `/auth/verify-email?email=${encodeURIComponent(data.email)}`;
+        // router.push(redirectUrl);
+        router.push('/waitlist');
         
         // Clear form
         setFirstName('');

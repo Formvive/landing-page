@@ -51,7 +51,7 @@ export default function LoginPage() {
       if (data?.data?.token) {
         localStorage.setItem('authToken', data.data.token);
         document.cookie = `authToken=${data.data.token}; path=/;`;
-        router.push('/onboarding');
+        router.push('/waitlist');
       } else {
         throw new Error('Token not received from server.');
       }

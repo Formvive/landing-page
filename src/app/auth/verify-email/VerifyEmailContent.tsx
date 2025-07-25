@@ -30,7 +30,7 @@ export default function VerifyEmailContent() {
         if (res.ok) {
           setStatus('success');
           setTimeout(() => {
-            router.push('/auth/login');
+            router.push('/login');
           }, 3000);
         } else {
           setStatus('error');
