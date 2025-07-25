@@ -28,43 +28,45 @@ export default function LoginPage() {
     e.preventDefault();
     setLoading(true);
     setError('');
-
+  
     try {
       const res = await fetch('https://form-vive-server.onrender.com/api/v1/auth/login', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password }),
       });
-
+  
       const data = await res.json();
-
+      // console.log(data);
+  
       if (!res.ok) {
         throw new Error(data.message || 'Login failed');
       }
+  
       if (data.message?.toLowerCase().includes('verify')) {
         router.push(`/verify-email?email=${encodeURIComponent(email)}`);
         return;
       }
-
-      // Store token
-      localStorage.setItem('authToken', data.token);
-
-      // Redirect after login
-      router.push('/onboarding');
+  
+      if (data?.data?.token) {
+        localStorage.setItem('authToken', data.data.token);
+        document.cookie = `authToken=${data.data.token}; path=/;`;
+        router.push('/onboarding');
+      } else {
+        throw new Error('Token not received from server.');
+      }
     } catch (err: unknown) {
       if (err instanceof Error) {
         setError(err.message);
-        console.log(err);
       } else {
         setError('An unexpected error occurred.');
-        console.log(err);
       }
+      console.log(err);
     } finally {
       setLoading(false);
     }
   };
+  
 
   return (
     <div className="flex flex-col items-center min-h-screen bg-white w-full">
@@ -79,7 +81,7 @@ export default function LoginPage() {
         <div className='loginBlock'>
             <h2 className="font-medium">Sign In</h2>
             <p className="text-center">Welcome Back</p>
-            <form className="loginForm">
+            <form className="loginForm" onSubmit={handleLogin}>
                 <input
                     type="email"
                     placeholder="Email"
@@ -104,7 +106,6 @@ export default function LoginPage() {
                 </div>
                 <button
                     type="submit"
-                    onClick={handleLogin}
                     disabled={loading}
                     className="w-full py-2 font-semibold text-white bg-black rounded"
                 >

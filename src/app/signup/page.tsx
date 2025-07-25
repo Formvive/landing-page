@@ -77,7 +77,7 @@ export default function SignUpPage() {
       } else {
         setSuccess(data.message || 'Sign up successful!');
         localStorage.setItem('token', data.token);
-        const redirectUrl = `/auth/verify-email?token=${data.token}&email=${encodeURIComponent(data.email)}`;
+        const redirectUrl = `/auth/verify-email?email=${encodeURIComponent(data.email)}`;
         router.push(redirectUrl);
         
         // Clear form
@@ -276,10 +276,16 @@ export default function SignUpPage() {
           {success && <p className="text-green-500 text-sm mt-2">{success}</p>}
 
           <div className="signUpBtns mt-4">
-            <button>
-              <Image src="/assets/icons/goog.png" alt="Google" width={20} height={20} />
-              Get started with Google
-            </button>
+          <button
+            type="button"
+            onClick={() => {
+              window.location.href = "https://form-vive-server.onrender.com/api/v1/auth/google";
+            }}
+            className="flex items-center gap-2 border border-gray-300 px-4 py-2 rounded"
+          >
+            <Image src="/assets/icons/goog.png" alt="Google" width={20} height={20} />
+            Get started with Google
+          </button>
             {/* <button>
               <Image src="/assets/icons/git.png" alt="GitHub" width={20} height={20} />
               Sign up with GitHub

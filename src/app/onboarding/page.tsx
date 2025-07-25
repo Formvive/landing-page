@@ -19,7 +19,7 @@ export default function OnboardingPage() {
 
   // Redirect to /signup if no token found
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('authToken');
     if (!token) {
       router.push('/signup');
     }
@@ -39,7 +39,7 @@ export default function OnboardingPage() {
     setLoading(true);
 
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem('authToken');
 
       if (!token) {
         setError('No signup token found. Please sign up again.');
@@ -67,7 +67,7 @@ export default function OnboardingPage() {
       if (!response.ok) {
         setError(data.message || 'Something went wrong');
       } else {
-        setSuccess('Onboarding completed! Redirecting...');
+        setSuccess('Onboarding completed! Welcome...');
         // Redirect to dashboard after short delay
         setTimeout(() => {
           router.push('/dashboard');
