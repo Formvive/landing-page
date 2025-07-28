@@ -93,17 +93,6 @@ export default function OnboardingPage() {
 
           <form className="signUpForm" onSubmit={handleSubmit}>
             <div className="inputGroup">
-              <label>Full Name</label>
-              <input
-                type="text"
-                placeholder="Enter your full name"
-                value={fullName}
-                onChange={(e) => setFullName(e.target.value)}
-                className="border border-gray-300 rounded"
-              />
-            </div>
-
-            <div className="inputGroup">
               <label>Your Role / Job Title</label>
               <input
                 type="text"
@@ -116,13 +105,17 @@ export default function OnboardingPage() {
 
             <div className="inputGroup">
               <label>Company or Team Size</label>
-              <input
-                type="number"
-                placeholder="Example: 1, 2–5, 6–10, 11+"
+              <select
                 value={companySize}
                 onChange={(e) => setCompanySize(e.target.value)}
-                className="border border-gray-300 rounded"
-              />
+                className="border border-gray-300 rounded px-3 py-2 w-full"
+              >
+                <option value="">Select size</option>
+                <option value="1">1</option>
+                <option value="2-5">2–5</option>
+                <option value="6-10">6–10</option>
+                <option value="11+">11+</option>
+              </select>
             </div>
 
             <div className="inputGroup">

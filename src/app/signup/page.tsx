@@ -77,7 +77,7 @@ export default function SignUpPage() {
       } else {
         setSuccess(data.message || 'Sign up successful!');
         localStorage.setItem('token', data.token);
-        const redirectUrl = `/auth/verify-email?email=${encodeURIComponent(data.email)}`;
+        const redirectUrl = `/auth/verify-email?email=${encodeURIComponent(data.email)}?userId=${encodeURIComponent(data.userId)}`;
         router.push(redirectUrl);
         
         // Clear form
