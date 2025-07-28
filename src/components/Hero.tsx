@@ -23,14 +23,17 @@ export default function Hero() {
         </div>
         <span>FORMVIVE</span>
         <div className={styles.actions}>
-          <Link href={"/login"}><span>Login</span></Link>
-          <Link href={"/signup"}><button className={styles.cta}>Get Started</button></Link>
+          <Link href={"/waitlist"}><span>Login</span></Link>
+          <Link href={"/waitlist"}><button className={styles.cta}>Get Started</button></Link>
+          {/* <Link href={"/login"}><span>Login</span></Link>
+          <Link href={"/signup"}><button className={styles.cta}>Get Started</button></Link> */}
         </div>
       </div>
       <div className={styles.topBarMobile}>
         <span>FORMVIVE</span>
         <div className={styles.actions}>
-          <Link href={"/signup"}><button className={styles.cta}>Get Started</button></Link>
+          <Link href={"/waitlist"}><button className={styles.cta}>Get Started</button></Link>
+          {/* <Link href={"/signup"}><button className={styles.cta}>Get Started</button></Link> */}
           <button onClick={() => setIsOpen(true)}aria-label="Open menu"><Image src="/assets/icons/burger.svg" alt="mobile menu button" width={30} height={20} /></button>
         </div>
 
@@ -47,7 +50,8 @@ export default function Hero() {
             <li><Link href="/" className={styles.active}>Home</Link></li>
             <li><Link href="/">Product</Link></li>
             {/* <li><Link href="/">Pricing</Link></li> */}
-            <li><Link href="/login">Login</Link></li>
+            <li><Link href="/waitlist">Login</Link></li>
+            {/* <li><Link href="/login">Login</Link></li> */}
           </ul>
         </div>
 

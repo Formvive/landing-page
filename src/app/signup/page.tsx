@@ -23,9 +23,9 @@ export default function SignUpPage() {
   const [confirmPasswordVisible, setConfirmPasswordVisible] = useState(false);
   const [passwordScore, setPasswordScore] = useState(0);
   const [passwordFeedback, setPasswordFeedback] = useState<string[]>([]);  
-  // const [loading, setLoading] = useState(false);
-  // const [error, setError]     = useState('');
-  // const [success, setSuccess] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError]     = useState('');
+  const [success, setSuccess] = useState('');
   const [emailError, setEmailError] = useState('');
   // const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   
@@ -45,63 +45,58 @@ export default function SignUpPage() {
     setEmailError(regex.test(val) ? '' : 'Please enter a valid email');
   };
 
-  // const handleSubmit = async (e: React.FormEvent) => {
-  //   e.preventDefault();
-  //   setError('');
-  //   setSuccess('');
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setSuccess('');
 
-  //   if (!isPasswordMatch) {
-  //     setError('Passwords do not match');
-  //     return;
-  //   }
+    if (!isPasswordMatch) {
+      setError('Passwords do not match');
+      return;
+    }
 
-  //   if (!termsAccepted) {
-  //     setError('You must accept the terms');
-  //     return;
-  //   }
-  //   if (emailError) return setError('Please fix your email address');
+    if (!termsAccepted) {
+      setError('You must accept the terms');
+      return;
+    }
+    if (emailError) return setError('Please fix your email address');
 
-  //   setLoading(true);
+    setLoading(true);
 
-  //   try {
-  //     const response = await fetch('https://form-vive-server.onrender.com/api/v1/auth/sign-up', {
-  //       method: 'POST',
-  //       headers: { 'Content-Type': 'application/json' },
-  //       body: JSON.stringify({ email, password, confirmPassword, termsAccepted, consented, firstName, lastName }),
-  //     });
+    try {
+      const response = await fetch('https://form-vive-server.onrender.com/api/v1/auth/sign-up', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password, confirmPassword, termsAccepted, consented, firstName, lastName }),
+      });
 
-  //     const data = await response.json();
+      const data = await response.json();
 
-  //     if (!response.ok) {
-  //       setError(data.message || 'Sign up failed');
-  //     } else {
-  //       setSuccess(data.message || 'Sign up successful!');
-  //       localStorage.setItem('token', data.token);
-  //       // const redirectUrl = `/auth/verify-email?email=${encodeURIComponent(data.email)}`;
-  //       // router.push(redirectUrl);
-  //       router.push('/waitlist');
+      if (!response.ok) {
+        setError(data.message || 'Sign up failed');
+      } else {
+        setSuccess(data.message || 'Sign up successful!');
+        localStorage.setItem('token', data.token);
+        // const redirectUrl = `/auth/verify-email?email=${encodeURIComponent(data.email)}`;
+        // router.push(redirectUrl);
+        router.push('/waitlist');
         
-  //       // Clear form
-  //       setFirstName('');
-  //       setLastName('');
-  //       setEmail('');
-  //       setPassword('');
-  //       setConfirmPassword('');
-  //       setTermsAccepted(false);
-  //       setConsented(false);
-  //     }
-  //   } catch (err) {
-  //     console.error(err);
-  //     setError('An unexpected error occurred');
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-
-  const handleSubmit = () => {
-    router.push('/waitlist');
+        // Clear form
+        setFirstName('');
+        setLastName('');
+        setEmail('');
+        setPassword('');
+        setConfirmPassword('');
+        setTermsAccepted(false);
+        setConsented(false);
+      }
+    } catch (err) {
+      console.error(err);
+      setError('An unexpected error occurred');
+    } finally {
+      setLoading(false);
+    }
   };
-
   // Lazy-load zxcvbn only when password changes
   useEffect(() => {
     if (!password) {
@@ -269,20 +264,17 @@ export default function SignUpPage() {
               <span className="ml-2">I consent to be contacted for marketing purposes, perks and offers by Formvive.com</span>
             </div>
 
-            {/* <button
+            <button
               type="submit"
               className="signUpBtn mt-4"
               disabled={loading || !isPasswordValid}
             >
               {loading ? 'Signing up...' : 'Get started'}
-            </button> */}
-            <button type='submit' className='signUpBtn mt-4' disabled={!isPasswordValid}>
-              Get Started
             </button>
           </form>
-{/* 
+
           {error && <p className="text-red-500 text-sm mt-2">{error}</p>}
-          {success && <p className="text-green-500 text-sm mt-2">{success}</p>} */}
+          {success && <p className="text-green-500 text-sm mt-2">{success}</p>}
 
           <div className="signUpBtns mt-4">
           <button
