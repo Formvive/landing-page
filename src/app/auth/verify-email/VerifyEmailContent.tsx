@@ -21,7 +21,7 @@ export default function VerifyEmailContent() {
 
     const verifyEmail = async () => {
       try {
-        const res = await fetch('https://api.formvive.com/auth/verify-email', {
+        const res = await fetch('https://form-vive-server.onrender.com/api/v1/auth/verify-email', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ token }),
