@@ -1,33 +1,35 @@
 "use client";
 import './page.css';
-import { useState, useEffect } from "react";
-import { useRouter } from 'next/navigation';
+import { useState
+  // , useEffect
+ } from "react";
+// import { useRouter } from 'next/navigation';
 import Sidebar from "@/components/Sidebar";
 import DashboardHeader from "@/components/DashboardHeader";
 import { Menu } from "lucide-react";
 
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
-  const router = useRouter();
+  // const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  // const router = useRouter();
 
-  useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    if (!token) {
-      router.push('/login');
-    } else {
-      setIsCheckingAuth(false);
-    }
-  }, [router]);
+  // useEffect(() => {
+  //   const token = localStorage.getItem('authToken');
+  //   if (!token) {
+  //     router.push('/login');
+  //   } else {
+  //     setIsCheckingAuth(false);
+  //   }
+  // }, [router]);
 
-  if (isCheckingAuth) {
-    // Optional: loading state while checking auth
-    return (
-      <div className="flex justify-center items-center h-screen">
-        <span>Loading...</span>
-      </div>
-    );
-  }
+  // if (isCheckingAuth) {
+  //   // Optional: loading state while checking auth
+  //   return (
+  //     <div className="flex justify-center items-center h-screen">
+  //       <span>Loading...</span>
+  //     </div>
+  //   );
+  // }
 
   return (
     <div className="dashboardPage flex min-h-screen">
