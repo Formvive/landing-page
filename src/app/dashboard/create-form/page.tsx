@@ -2,8 +2,10 @@
 import { LayoutGrid, List, Plus, FileEdit } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 
 export default function MyFormsPage() {
+  const router = useRouter();
   const [view, setView] = useState("grid");
 
   const recentForms = [
@@ -18,7 +20,7 @@ export default function MyFormsPage() {
       <div>
         <h1 className="text-xl font-semibold mb-4">Start new form</h1>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="flex flex-col items-center justify-center border rounded-xl p-4 hover:bg-gray-50 cursor-pointer">
+          <div className="flex flex-col items-center justify-center border rounded-xl p-4 hover:bg-gray-50 cursor-pointer" onClick={() => router.push("/dashboard/classic-form-editor")}>
             <Plus size={32} />
             <span className="mt-2 text-sm">Classic form</span>
           </div>

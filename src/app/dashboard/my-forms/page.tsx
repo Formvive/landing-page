@@ -56,8 +56,10 @@ export default function MyFormsPage() {
                   <td className="px-6 py-4">{form.name}</td>
                   <td className="px-6 py-4">{form.updated}</td>
                   <td className="px-6 py-4">{form.responses}</td>
-                  <td className="px-6 py-4 text-blue-600 underline cursor-pointer">
-                    View more
+                  <td className="px-6 py-4">
+                    <Link href={`/dashboard/my-forms/${idx}`} className="text-blue-600 underline">
+                      View more
+                    </Link>
                   </td>
                 </tr>
               ))}
@@ -75,7 +77,11 @@ export default function MyFormsPage() {
             <span className="text-sm font-medium text-center">{form.name}</span>
             <span className="text-xs text-gray-500 mt-1">{form.updated}</span>
             <span className="text-xs text-gray-500 mt-1">{form.responses}</span>
-            <button className="text-blue-600 underline text-xs">View more</button>
+            <button className="text-blue-600 underline text-xs">
+              <Link href={`/dashboard/my-forms/${idx}`} className="text-blue-600 underline">
+                View more
+              </Link>
+            </button>
           </div>
         ))}
       </div>

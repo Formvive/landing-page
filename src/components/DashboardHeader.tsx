@@ -1,4 +1,5 @@
 import Image from "next/image";
+import './components.css';
 
 export default function DashboardHeader() {
   return (
