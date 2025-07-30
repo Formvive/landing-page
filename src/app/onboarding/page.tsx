@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
+import { useSearchParams, useRouter } from 'next/navigation';
 import './page.css';
 
 export default function OnboardingPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const userId = searchParams.get('userId');
 
-  const [fullName, setFullName]       = useState('');
   const [role, setRole]               = useState('');
   const [companySize, setCompanySize] = useState('');
   const [useCase, setUseCase]         = useState('');
@@ -19,8 +20,7 @@ export default function OnboardingPage() {
 
   // Redirect to /signup if no token found
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
-    if (!token) {
+    if (!userId) {
       router.push('/signup');
     }
   }, [router]);
@@ -31,7 +31,7 @@ export default function OnboardingPage() {
     setError('');
     setSuccess('');
 
-    if (!fullName || !role || !companySize || !useCase) {
+    if ( !role || !companySize || !useCase) {
       setError('Please fill in all fields');
       return;
     }
@@ -54,7 +54,6 @@ export default function OnboardingPage() {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
-          fullName,
           role,
           companySize: Number(companySize),
           useCase,

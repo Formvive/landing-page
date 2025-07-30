@@ -123,10 +123,16 @@ export default function LoginPage() {
                 </div>
             </form>
             <div className="signUpBtns">
-            <button>
-                <Image src="/assets/icons/goog.png" alt="Google" width={20} height={20} className="mr-2" />
-                Sign up with Google
-            </button>
+            <button
+            type="button"
+            onClick={() => {
+              window.location.href = "https://form-vive-server.onrender.com/api/v1/auth/google";
+            }}
+            className="flex items-center gap-2 border border-gray-300 px-4 py-2 rounded"
+          >
+            <Image src="/assets/icons/goog.png" alt="Google" width={20} height={20} />
+            Sign In with Google
+          </button>
             {/* <button>
                 <Image src="/assets/icons/git.png" alt="GitHub" width={20} height={20} className="mr-2" />
                 Sign up with GitHub
