@@ -54,6 +54,7 @@ export default function OnboardingContext() {
           'Authorization': `Bearer ${token}`
         },
         body: JSON.stringify({
+            userId,
           role,
           companySize: Number(companySize),
           useCase,
