@@ -110,10 +110,11 @@ export default function OnboardingContext() {
                 className="border border-gray-300 rounded px-3 py-2 w-full"
               >
                 <option value="">Select size</option>
-                <option value="1">1</option>
-                <option value="2-5">2–5</option>
-                <option value="6-10">6–10</option>
-                <option value="11+">11+</option>
+                <option value="1">Just Me</option>
+                <option value="2-10">2–10 People</option>
+                <option value="11-25">11-25 People</option>
+                <option value="26-50">26-50 People</option>
+                <option value="51+">51+</option>
               </select>
             </div>
 
