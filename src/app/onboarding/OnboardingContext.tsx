@@ -20,7 +20,8 @@ export default function OnboardingContext() {
 
   // Redirect to /signup if no token found
   useEffect(() => {
-    if (!userId) {
+    const token = localStorage.getItem('authToken');
+    if (!userId && !token) {
       router.push('/signup');
     }
   }, [router, userId]);
