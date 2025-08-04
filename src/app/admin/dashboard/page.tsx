@@ -1,107 +1,114 @@
-import { FC } from "react";
-import SignupsChart from "@/components/SignUpsChart";
+"use client";
 
-interface Metric {
+import { FC } from "react";
+import {
+  LineChart,
+  Line,
+  BarChart,
+  Bar,
+  PieChart,
+  Pie,
+  Cell,
+  Legend,
+  ResponsiveContainer,
+} from "recharts";
+
+// ------------------------------
+// 1. TYPES
+// ------------------------------
+
+// Generic type for any small chart–driving array.
+// Keys are column names; values are either string or number.
+export type DataPoint = Record<string, string | number>;
+
+export interface Metric {
   title: string;
   value: string;
   delta?: string;
   deltaPositive?: boolean;
   subText?: string;
-  verified?: boolean;
+
+  // Optional spark chart at the bottom of the card:
+  chart?: "line" | "bar";
+
+  // Data for that spark chart:
+  data?: DataPoint[];
+  dataKey?: string;
 }
 
-// interface SiteActivity {
-//   topicsLast7Days: number;
-//   postsToday: number;
-//   activeUsers7Days: number;
-//   signups7Days: number;
-//   likesAllTime: number;
-//   chatMessages7Days: number;
-// }
+// ------------------------------
+// 2. MOCK DATA
+// ------------------------------
 
-const metricData: Metric[] = [
+// 2.1 User & Account Metrics
+const userMetrics: Metric[] = [
   {
-    title: "Verified followers",
-    value: "1.3K / 5.9K",
-    subText: undefined,
-    verified: true,
+    title: "Total Signups",
+    value: "2.0K",
+    chart: "line",
+    dataKey: "signups",
+    data: [
+      { date: "Jun", signups: 150 },
+      { date: "Jul", signups: 280 },
+      { date: "Aug", signups: 340 },
+      { date: "Sep", signups: 420 },
+    ],
   },
-  {
-    title: "Impressions",
-    value: "9.5M",
-    delta: "↑406K%",
-    deltaPositive: true,
-  },
-  {
-    title: "Engagement rate",
-    value: "2.1%",
-    delta: "↓74%",
-    deltaPositive: false,
-  },
-  {
-    title: "Engagements",
-    value: "203.7K",
-    delta: "↑105K%",
-    deltaPositive: true,
-  },
-  {
-    title: "Profile visits",
-    value: "66.8K",
-    delta: "↑215K%",
-    deltaPositive: true,
-  },
-  {
-    title: "Replies",
-    value: "9K",
-    delta: "↑56K%",
-    deltaPositive: true,
-  },
-  {
-    title: "Likes",
-    value: "47K",
-    delta: "↑114K%",
-    deltaPositive: true,
-  },
-  {
-    title: "Reposts",
-    value: "1.4K",
-    delta: "↑143K%",
-    deltaPositive: true,
-  },
-  {
-    title: "Bookmarks",
-    value: "12.9K",
-    delta: "↑1M%",
-    deltaPositive: true,
-  },
-  {
-    title: "Shares",
-    value: "485",
-    delta: "↑6K%",
-    deltaPositive: true,
-  },
+  { title: "Active Users (7d)", value: "1.2K" },
+  { title: "Active Users (30d)", value: "1.8K" },
+  { title: "Waitlist Signups", value: "500" },
+  { title: "Conversion Rate", value: "25%", delta: "↑5%", deltaPositive: true },
 ];
 
-// Mock signups chart data
-const signupsChartData = [
-  { date: "Jun 8", signups: 5 },
-  { date: "Jun 15", signups: 60 },
-  { date: "Jun 22", signups: 220 },
-  { date: "Jun 29", signups: 450 },
-  { date: "Jul 6", signups: 720 },
-  { date: "Jul 13", signups: 1000 },
-  { date: "Jul 20", signups: 1400 },
-  { date: "Jul 25", signups: 2022 },
+const signupsByRegion = [
+  { name: "North America", value: 800 },
+  { name: "Europe",        value: 600 },
+  { name: "Asia",          value: 400 },
+  { name: "Other",         value: 200 },
 ];
 
-// const siteActivity: SiteActivity = {
-//   topicsLast7Days: 32,
-//   postsToday: 556,
-//   activeUsers7Days: 475,
-//   signups7Days: 477,
-//   likesAllTime: 71,
-//   chatMessages7Days: 110,
-// };
+const signupsByDevice = [
+  { name: "Desktop", value: 1200 },
+  { name: "Mobile",  value: 800 },
+];
+
+// 2.2 Formvive Usage Stats
+const usageStats: Metric[] = [
+  { title: "Total Forms Created", value: "5.9K" },
+  {
+    title: "Forms Created Per Week",
+    value: "",
+    chart: "bar",
+    dataKey: "forms",
+    data: [
+      { week: "W1", forms: 300 },
+      { week: "W2", forms: 450 },
+      { week: "W3", forms: 600 },
+      { week: "W4", forms: 720 },
+    ],
+  },
+  { title: "Forms Shared",       value: "1.1K" },
+  { title: "With Responses",     value: "3.2K", subText: "vs 2.7K without" },
+  { title: "Top Form Type",      value: "Standard" },
+];
+
+// 2.3 Engagement & Interaction
+const engagementMetrics: Metric[] = [
+  { title: "Form Completion Rate",   value: "89%" },
+  { title: "Avg Time to Complete",   value: "00:07:32" },
+  { title: "Form Abandonment Rate",  value: "11%" },
+  { title: "View-to-Response Ratio", value: "4:1" },
+];
+
+const interactionModes = [
+  { name: "Chat",  value: 40 },
+  { name: "Swipe", value: 35 },
+  { name: "Story", value: 25 },
+];
+
+// ------------------------------
+// 3. COMPONENTS
+// ------------------------------
 
 const MetricCard: FC<Metric> = ({
   title,
@@ -109,158 +116,138 @@ const MetricCard: FC<Metric> = ({
   delta,
   deltaPositive,
   subText,
-  verified,
-}) => {
-  return (
-    <div className="bg-slate-900 rounded-2xl p-5 flex flex-col justify-between shadow-md min-w-[180px]">
-      <div className="flex items-center justify-between">
-        <div className="text-sm text-slate-300 font-medium flex items-center gap-1">
-          {title}
-          {verified && (
-            <span className="text-blue-400 text-xs font-bold">✔︎</span>
-          )}
-        </div>
-        <div>
-          <svg
-            width="16"
-            height="16"
-            fill="none"
-            className="text-slate-500"
-            xmlns="http://www.w3.org/2000/svg"
-          >
-            <path
-              d="M6 4l4 4-4 4"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
-      </div>
-      <div className="mt-3 flex items-baseline gap-2">
-        <div className="text-2xl font-semibold">{value}</div>
-        {delta && (
-          <div
-            className={`text-sm font-medium flex items-center gap-1 ${
-              deltaPositive ? "text-green-400" : "text-rose-500"
-            }`}
-          >
-            {deltaPositive ? "↑" : "↓"}
-            {delta.replace(/[↑↓]/, "")}
-          </div>
-        )}
-      </div>
-      {subText && <div className="text-xs text-slate-500 mt-1">{subText}</div>}
+  chart,
+  data,
+  dataKey,
+}) => (
+  <div className="bg-slate-900 rounded-2xl p-5 flex flex-col justify-between shadow-md min-w-[180px]">
+    {/* header */}
+    <div className="flex items-center justify-between">
+      <div className="text-sm text-slate-300 font-medium">{title}</div>
+      <svg
+        width="16"
+        height="16"
+        fill="none"
+        className="text-slate-500"
+        xmlns="http://www.w3.org/2000/svg"
+      >
+        <path
+          d="M6 4l4 4-4 4"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
     </div>
-  );
-};
 
-const ActivityItem: FC<{ label: string; value: string | number; note?: string }> =
-  ({ label, value, note }) => {
-    return (
-      <div className="flex items-start gap-3">
-        <div className="flex-shrink-0">
-          <div className="bg-slate-700 rounded-full p-2">
-            <span className="sr-only">{label} icon</span>
-          </div>
+    {/* value & delta */}
+    <div className="mt-3 flex items-baseline gap-2">
+      <div className="text-2xl font-semibold">{value}</div>
+      {delta && (
+        <div
+          className={`text-sm font-medium flex items-center gap-1 ${
+            deltaPositive ? "text-green-400" : "text-rose-500"
+          }`}
+        >
+          {deltaPositive ? "↑" : "↓"}
+          {delta.replace(/[↑↓]/, "")}
         </div>
-        <div className="flex flex-col">
-          <div className="text-sm font-medium text-slate-200">{label}</div>
-          <div className="text-lg font-semibold text-white">{value}</div>
-          {note && <div className="text-xs text-slate-500">{note}</div>}
-        </div>
-      </div>
-    );
-  };
+      )}
+    </div>
 
-const DashboardPage: FC = () => {
-  return (
-    <div className="min-h-screen w-full bg-[#0f111a] text-white p-6 space-y-8">
-      <h1 className="text-3xl font-bold mb-4">Dashboard</h1>
+    {/* subText */}
+    {subText && <div className="text-xs text-slate-500 mt-1">{subText}</div>}
 
-      {/* Metrics grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-5">
-        {metricData.map((m) => (
-          <MetricCard
-            key={m.title}
-            title={m.title}
-            value={m.value}
-            delta={m.delta}
-            deltaPositive={m.deltaPositive}
-            subText={m.subText}
-            verified={m.verified}
+    {/* spark chart */}
+    {chart === "line" && data && dataKey && (
+      <ResponsiveContainer width="100%" height={50} className="mt-2">
+        <LineChart data={data as DataPoint[]}>
+          <Line
+            type="monotone"
+            dataKey={dataKey}
+            stroke="#a78bfa"
+            strokeWidth={2}
+            dot={false}
           />
+        </LineChart>
+      </ResponsiveContainer>
+    )}
+    {chart === "bar" && data && dataKey && (
+      <ResponsiveContainer width="100%" height={50} className="mt-2">
+        <BarChart data={data as DataPoint[]}>
+          <Bar dataKey={dataKey} barSize={8} />
+        </BarChart>
+      </ResponsiveContainer>
+    )}
+  </div>
+);
+
+const COLORS = ["#8884d8", "#82ca9d", "#ffc658", "#ff8042"];
+const SimplePie: FC<{ data: { name: string; value: number }[]; title: string }> = ({
+  data,
+  title,
+}) => (
+  <div className="bg-slate-900 rounded-2xl p-5 shadow-md">
+    <div className="text-sm text-slate-300 font-medium mb-2">{title}</div>
+    <ResponsiveContainer width="100%" height={150}>
+      <PieChart>
+        <Pie data={data} dataKey="value" nameKey="name" outerRadius={60} label>
+          {data.map((_, i) => (
+            <Cell key={i} fill={COLORS[i % COLORS.length]} />
+          ))}
+        </Pie>
+        <Legend verticalAlign="bottom" height={20} />
+      </PieChart>
+    </ResponsiveContainer>
+  </div>
+);
+
+// ------------------------------
+// 4. PAGE
+// ------------------------------
+
+const DashboardPage: FC = () => (
+  <div className="min-h-screen w-full bg-[#0f111a] text-white p-6 space-y-8">
+    <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+
+    {/* User & Account Metrics */}
+    <section>
+      <h2 className="text-xl font-semibold mb-4">User & Account Metrics</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        {userMetrics.map((m) => (
+          <MetricCard key={m.title} {...m} />
         ))}
       </div>
-
-      {/* Bottom section: site activity + signups chart */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Signups chart card */}
-        <div className="col-span-2 bg-slate-900 rounded-2xl p-6 shadow-md flex flex-col">
-          <div className="flex justify-between items-center mb-4">
-            <div>
-              <div className="text-sm text-slate-300 font-medium flex items-center gap-1">
-                Total sign-ups
-                <div className="text-xs text-slate-400">
-                  <svg
-                    width="14"
-                    height="14"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    className="inline-block"
-                  >
-                    <circle cx="7" cy="7" r="6" />
-                    <path d="M7 4v2M7 8v2" />
-                  </svg>
-                </div>
-              </div>
-              <div className="text-4xl font-semibold mt-1">2,022</div>
-              <div className="text-xs text-slate-500">All time</div>
-            </div>
-            <div className="text-xs text-slate-400">Updated seconds ago</div>
-          </div>
-          <div className="flex-1">
-            <SignupsChart data={signupsChartData} />
-          </div>
-          <div className="mt-4 flex justify-end">
-            <div className="text-sm text-slate-400 cursor-pointer hover:underline">
-              View all users &rarr;
-            </div>
-          </div>
-        </div>
-
-        {/* Site activity card */}
-        <div className="bg-slate-900 rounded-2xl p-6 shadow-md flex flex-col">
-          <div className="text-xl font-semibold mb-2">Site activity</div>
-          <div className="grid grid-cols-1 gap-4">
-            <ActivityItem
-              label="32 topics"
-              value="in the last 7 days"
-              note=""
-            />
-            <ActivityItem label="556 posts" value="today" />
-            <ActivityItem
-              label="475 active users"
-              value="in the last 7 days"
-            />
-            <ActivityItem
-              label="477 sign-ups"
-              value="in the last 7 days"
-            />
-            <ActivityItem label="71 likes" value="all time" />
-            <ActivityItem
-              label="110 chat messages"
-              value="in the last 7 days"
-            />
-          </div>
-        </div>
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+        <SimplePie data={signupsByRegion} title="Signups by Region" />
+        <SimplePie data={signupsByDevice} title="Signups by Device" />
       </div>
-    </div>
-  );
-};
+    </section>
+
+    {/* Formvive Usage Stats */}
+    <section>
+      <h2 className="text-xl font-semibold mb-4">Formvive Usage Stats</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        {usageStats.map((m) => (
+          <MetricCard key={m.title} {...m} />
+        ))}
+      </div>
+    </section>
+
+    {/* Engagement & Interaction */}
+    <section>
+      <h2 className="text-xl font-semibold mb-4">Engagement & Interaction</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+        {engagementMetrics.map((m) => (
+          <MetricCard key={m.title} {...m} />
+        ))}
+      </div>
+      <div className="mt-6">
+        <SimplePie data={interactionModes} title="Popular Interaction Modes" />
+      </div>
+    </section>
+  </div>
+);
 
 export default DashboardPage;
