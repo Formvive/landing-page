@@ -42,8 +42,8 @@ export default function OnboardingContext() {
     try {
       const token = localStorage.getItem('authToken');
 
-      if (!token) {
-        setError('No signup token found. Please sign up again.');
+      if (!token && !userId) {
+        setError('Unauthorized access. Please sign up.');
         router.push('/signup');
         return;
       }
