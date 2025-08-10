@@ -2,16 +2,9 @@
 
 import { PieChart, Pie, Cell, ResponsiveContainer } from "recharts";
 
-const data = [
-  { name: "United States", value: 52.1 },
-  { name: "Canada", value: 22.8 },
-  { name: "Nigeria", value: 13.9 },
-  { name: "Other", value: 11.2 },
-];
-
 const COLORS = ["#000000", "#A7D8DE", "#34D399", "#CBD5E1"];
 
-export default function DonutChart() {
+export default function DonutChart({ data }: { data: { name: string; value: number }[] })  {
   return (
     <div>
       <h3 className="font-semibold text-lg mb-4">Responses by Location</h3>
