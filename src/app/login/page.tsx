@@ -45,6 +45,7 @@ export default function LoginPage() {
   
       if (data.redirectUrl ) {
         localStorage.setItem('authToken', data.token);
+        localStorage.setItem('userId', data.userId);
         router.push('/onboarding');
         return;
       }
