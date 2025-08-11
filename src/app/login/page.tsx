@@ -43,15 +43,15 @@ export default function LoginPage() {
         throw new Error(data.message || 'Login failed');
       }
   
-      if (data.message?.toLowerCase().includes('verify')) {
-        router.push(`/verify-email?email=${encodeURIComponent(email)}`);
+      if (data.redirectUrl ) {
+        router.push('/onboarding');
         return;
       }
   
-      if (data?.data?.token) {
+      if (!data.redirectUrl) {
         localStorage.setItem('authToken', data.data.token);
         document.cookie = `authToken=${data.data.token}; path=/;`;
-        router.push('/onboarding');
+        router.push('/dashboard');
       } else {
         throw new Error('Token not received from server.');
       }
