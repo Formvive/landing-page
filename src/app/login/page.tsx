@@ -44,6 +44,7 @@ export default function LoginPage() {
       }
   
       if (data.redirectUrl ) {
+        localStorage.setItem('authToken', data.token);
         router.push('/onboarding');
         return;
       }
