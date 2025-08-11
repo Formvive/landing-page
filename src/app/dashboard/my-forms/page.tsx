@@ -6,11 +6,32 @@ import { Plus, LayoutGrid, List, FileEdit } from "lucide-react";
 export default function MyFormsPage() {
   const [view, setView] = useState<"list" | "grid">("list");
 
-  const forms = Array(6).fill({
+  const forms = Array(2).fill({
     name: "Customer Survey Feedback",
     updated: "1 hour ago",
     responses: 123,
   });
+
+  if (forms.length === 0) {
+    return (
+      <div className="flex flex-col space-y-6">
+        {/* Header */}
+        <div className="flex justify-between items-center">
+          <h1 className="text-xl font-semibold">My Forms (0)</h1>
+          <Link href={"/dashboard/create-form"}>
+            <button className="flex items-center gap-2 bg-black text-white text-xs px-4 py-2 rounded-md">
+              <Plus size={16} /> Create Form
+            </button>
+          </Link>
+        </div>
+
+        {/* Empty placeholder */}
+        <div className="border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center h-40">
+          <p className="text-gray-500">You haven’t created any forms yet.</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col space-y-6">

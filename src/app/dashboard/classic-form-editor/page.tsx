@@ -1,240 +1,139 @@
 "use client";
 import { useState } from "react";
-import { QuestionField } from "@/types";
-import RichTextEditor from "@/components/LexicalEditor";
-import PreviewModal from "@/components/PreviewModal";
-import type { DragEndEvent } from "@dnd-kit/core";
-import {
-  DndContext,
-  closestCenter,
-  PointerSensor,
-  useSensor,
-  useSensors,
-} from "@dnd-kit/core";
-import {
-  SortableContext,
-  arrayMove,
-  verticalListSortingStrategy,
-} from "@dnd-kit/sortable";
-import SortableQuestionCard from "@/components/SortableQuestionCard";
+import ClassicFormEditor from "./classicForm";
 
+function StoryFormEditor() {
+  const [storyBlocks, setStoryBlocks] = useState<string[]>(["Once upon a time..."]);
+  const [newBlock, setNewBlock] = useState("");
 
-export default function ClassicFormEditor() {
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
-  const [formTitle, setFormTitle] = useState("");
-  const [formDescriptionJSON, setFormDescriptionJSON] = useState("");
-
-  const [formData, setFormData] = useState({
-    challenges: "",
-    dineOutFrequency: "",
-    restaurantFactors: "",
-    searchInfo: "",
-    expectedFeatures: "",
-    currentExperience: "",
-    pastDifficulties: "",
-    reservationPreference: "",
-    paymentOptions: "",
-    easeExpectations: "",
-    encourageSwitch: "",
-  });
-
-  const [questions, setQuestions] = useState<QuestionField[]>([
-    {
-      id: "q1",
-      label:
-        "What are the biggest challenges you face when making restaurant reservations in Nigeria?",
-      type: "textarea",
-      name: "challenges",
-      value: "",
-    },
-    {
-      id: "q2",
-      label: "How often do you dine out in restaurants?",
-      type: "radio",
-      name: "dineOutFrequency",
-      options: ["Always", "Sometimes", "Never"],
-      value: "",
-    },
-    {
-      id: "q3",
-      label: "What factors influence your choice of restaurant?",
-      type: "input",
-      name: "restaurantFactors",
-      value: "",
-    },
-    {
-      id: "q4",
-      label:
-        "What information do you typically look for when searching for a restaurant to make a reservation?",
-      type: "textarea",
-      name: "searchInfo",
-      value: "",
-    },
-    {
-      id: "q5",
-      label:
-        "What are the most important features or functionalities you expect from a table reservation website?",
-      type: "textarea",
-      name: "expectedFeatures",
-      value: "",
-    },
-    {
-      id: "q6",
-      label:
-        "How do you currently make restaurant reservations, and what is your experience with the process?",
-      type: "textarea",
-      name: "currentExperience",
-      value: "",
-    },
-    {
-      id: "q7",
-      label:
-        "Have you ever encountered any difficulties when making a reservation or during a dining experience, and how did you resolve them?",
-      type: "textarea",
-      name: "pastDifficulties",
-      value: "",
-    },
-    {
-      id: "q8",
-      label:
-        "Do you prefer to book your restaurant reservations online or over the phone?",
-      type: "radio",
-      name: "reservationPreference",
-      options: ["Phone", "Online"],
-      value: "",
-    },
-    {
-      id: "q9",
-      label:
-        "What are your preferred payment options when booking a restaurant reservation online?",
-      type: "input",
-      name: "paymentOptions",
-      value: "",
-    },
-    {
-      id: "q10",
-      label:
-        "What are your expectations regarding the ease and speed of the reservation process?",
-      type: "input",
-      name: "easeExpectations",
-      value: "",
-    },
-    {
-      id: "q11",
-      value: "",
-      label:
-        "What could a table reservation website offer that would encourage you to use it instead of traditional reservation methods?",
-      type: "textarea",
-      name: "encourageSwitch",
-    },
-  ]);
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const sensors = useSensors(useSensor(PointerSensor));
-
-  const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
-    if (active.id !== over?.id) {
-      setQuestions((prev) => {
-        const oldIndex = prev.findIndex((q) => q.id === active.id);
-        const newIndex = prev.findIndex((q) => q.id === over?.id);
-        return arrayMove(prev, oldIndex, newIndex);
-      });
+  const addBlock = () => {
+    if (newBlock.trim()) {
+      setStoryBlocks((prev) => [...prev, newBlock.trim()]);
+      setNewBlock("");
     }
   };
 
-  const handleOpenPreview = () => {
-    setIsPreviewOpen(true); // No need for editor.update
+  return (
+    <div className="p-6 space-y-4 bg-white rounded-xl shadow-md">
+      <h3 className="text-lg font-semibold">📖 Story Mode</h3>
+      <div className="space-y-3">
+        {storyBlocks.map((block, idx) => (
+          <div
+            key={idx}
+            className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg leading-relaxed text-gray-800"
+          >
+            {block}
+          </div>
+        ))}
+      </div>
+      <textarea
+        value={newBlock}
+        onChange={(e) => setNewBlock(e.target.value)}
+        placeholder="Write the next part of the story..."
+        className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:outline-none resize-none"
+      />
+      <button
+        onClick={addBlock}
+        className="bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-2 rounded-lg font-medium shadow"
+      >
+        ➕ Add Story Block
+      </button>
+    </div>
+  );
+}
+
+function ChatFormEditor() {
+  const [messages, setMessages] = useState<{ from: "bot" | "user"; text: string }[]>([
+    { from: "bot", text: "👋 Hi! How can I help you create your form today?" }
+  ]);
+  const [input, setInput] = useState("");
+
+  const sendMessage = () => {
+    if (!input.trim()) return;
+    setMessages((prev) => [...prev, { from: "user", text: input.trim() }]);
+    setInput("");
+    setTimeout(() => {
+      setMessages((prev) => [
+        ...prev,
+        { from: "bot", text: "✅ Got it! I've added that to your form." }
+      ]);
+    }, 500);
   };
 
   return (
+    <div className="p-6 bg-white rounded-xl shadow-md flex flex-col h-[70vh]">
+      <h3 className="text-lg font-semibold mb-4">💬 Chat Mode</h3>
+      <div className="flex-1 overflow-y-auto space-y-3 mb-4">
+        {messages.map((m, idx) => (
+          <div
+            key={idx}
+            className={`flex ${m.from === "user" ? "justify-end" : "justify-start"}`}
+          >
+            <div
+              className={`max-w-xs px-4 py-2 rounded-2xl shadow-sm text-sm leading-relaxed ${
+                m.from === "bot"
+                  ? "bg-gray-100 text-gray-800 rounded-bl-none"
+                  : "bg-black text-white rounded-br-none"
+              }`}
+            >
+              {m.text}
+            </div>
+          </div>
+        ))}
+      </div>
+      <div className="flex space-x-2">
+        <input
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          placeholder="Type your message..."
+          className="flex-1 border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-black focus:outline-none"
+        />
+        <button
+          onClick={sendMessage}
+          className="bg-black text-white px-5 rounded-lg hover:bg-gray-800 font-medium"
+        >
+          Send
+        </button>
+      </div>
+    </div>
+  );
+}
+
+export default function FormEditor() {
+  type Mode = "chat" | "story" | "classic";
+  const [mode, setMode] = useState<Mode>("chat");
+
+  return (
     <div className="max-w-5xl mx-auto px-4 py-6 space-y-8">
-      {/* Header Row */}
+      {/* Header */}
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">Untitled form</h2>
-        <button className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 text-sm">
+        <button className="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 text-sm">
           Save & Continue
         </button>
       </div>
 
       {/* Mode Tabs */}
       <div className="flex space-x-6 border-b border-gray-200 pb-2">
-        {["Classic mode", "Story mode", "Chat mode"].map((tab, idx) => (
+        {(["classic", "story", "chat"] as Mode[]).map((tab) => (
           <button
-            key={idx}
-            className={`text-sm font-medium ${
-              tab === "Classic mode"
+            key={tab}
+            onClick={() => setMode(tab)}
+            className={`text-sm font-medium pb-1 ${
+              tab === mode
                 ? "border-b-2 border-black text-black"
                 : "text-gray-500 hover:text-black"
             }`}
           >
-            {tab}
+            {tab.charAt(0).toUpperCase() + tab.slice(1)} Mode
           </button>
         ))}
       </div>
 
-      {/* Title and Description */}
-      <div className="bg-white border rounded-xl p-4 space-y-4">
-        <input
-          type="text"
-          name="title"
-          placeholder="RESEARCH"
-          className="w-full text-2xl font-semibold outline-none"
-          value={formTitle}
-          onChange={(e) => setFormTitle(e.target.value)}
-        />
-        <RichTextEditor onChange={(value) => setFormDescriptionJSON(value)} />
-      </div>
-
-      {/* Sortable Questions */}
-      <div className="space-y-6">
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext
-            items={questions.map((q) => q.id)}
-            strategy={verticalListSortingStrategy}
-          >
-            {questions.map((field) => (
-              <SortableQuestionCard
-                key={field.id}
-                id={field.id}
-                field={field}
-                value={formData[field.name as keyof typeof formData]}
-                onChange={handleChange}
-              />
-            ))}
-          </SortableContext>
-        </DndContext>
-      </div>
-
-      {/* Preview Button */}
-      <div className="text-center pt-6">
-        <button
-          onClick={handleOpenPreview}
-          className="bg-black text-white px-6 py-2 rounded hover:bg-gray-800"
-        >
-          Preview
-        </button>
-      </div>
-
-      {/* ✅ PreviewModal Usage */}
-        <PreviewModal
-            isOpen={isPreviewOpen}
-            onClose={() => setIsPreviewOpen(false)}
-            title={formTitle}
-            description={formDescriptionJSON}
-            questions={questions}
-            formData={formData}
-        />
+      {/* Mode Content */}
+      {mode === "classic" && <ClassicFormEditor />}
+      {mode === "story" && <StoryFormEditor />}
+      {mode === "chat" && <ChatFormEditor />}
     </div>
   );
 }
