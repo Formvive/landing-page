@@ -48,3 +48,19 @@ export interface GetResponsesResponseBody {
     total: number;
     data: ResponseItem[];
 }
+
+export interface Draft {
+    title: string;
+    mode: string;
+    questions: number;
+    lastEdited: string;
+};
+
+export interface LiveForm {
+    title: string;
+    publishedAgo: string;
+    mode: string;
+    responses: number;
+    status: string;
+    previewUrl: string;
+  };
