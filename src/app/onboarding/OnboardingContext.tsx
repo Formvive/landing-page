@@ -7,7 +7,7 @@ import './page.css';
 export default function OnboardingContext() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const userId = searchParams.get('userId');
+  const userId = localStorage.getItem('userId') || searchParams.get('userId');
 
   const [role, setRole]               = useState('');
   const [companySize, setCompanySize] = useState('');
