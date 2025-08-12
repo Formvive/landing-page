@@ -64,3 +64,10 @@ export interface LiveForm {
     status: string;
     previewUrl: string;
   };
+
+export interface Form {
+    id: string;
+    name: string;
+    updated: string;
+    responses: number;
+  }

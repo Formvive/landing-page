@@ -18,11 +18,11 @@ import {
 } from "@dnd-kit/sortable";
 import SortableQuestionCard from "@/components/SortableQuestionCard";
 
-
 export default function ClassicFormEditor() {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [formTitle, setFormTitle] = useState("");
   const [formDescriptionJSON, setFormDescriptionJSON] = useState("");
+  const [saving, setSaving] = useState(false);
 
   const [formData, setFormData] = useState({
     challenges: "",
@@ -149,8 +149,77 @@ export default function ClassicFormEditor() {
     }
   };
 
+  const handleSave = async () => {
+    try {
+      setSaving(true);
+
+      // 1️⃣ Create form
+      const formRes = await fetch(
+        "https://form-vive-server.onrender.com/api/v1/user/create-form",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer authToken",
+          },
+          body: JSON.stringify({ formName: formTitle || "Untitled Form" }),
+        }
+      );
+
+      const formDataRes = await formRes.json();
+      if (!formRes.ok || !formDataRes?.data?.id) {
+        throw new Error("Failed to create form");
+      }
+
+      const formId = formDataRes.data.id;
+
+      // 2️⃣ Map questions to API format
+      const mappedQuestions = questions.map((q) => ({
+        text: q.label,
+        type:
+          q.type === "radio"
+            ? "MULTIPLE_CHOICE"
+            : "OPEN_ENDED",
+        required: true,
+        options:
+          q.options?.map((opt) => ({
+            text: opt,
+            value: opt.toLowerCase(),
+          })) || [],
+      }));
+
+      // 3️⃣ Send questions
+      const questionsRes = await fetch(
+        "https://form-vive-server.onrender.com/api/v1/user/create-questions",
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer authToken",
+          },
+          body: JSON.stringify({
+            formId,
+            questions: mappedQuestions,
+          }),
+        }
+      );
+
+      // const questionsData = await questionsRes.json();
+      if (!questionsRes.ok) {
+        throw new Error("Failed to create questions");
+      }
+
+      alert("Form & questions saved successfully!");
+    } catch (error) {
+      console.error(error);
+      alert("Error saving form");
+    } finally {
+      setSaving(false);
+    }
+  };
+
   const handleOpenPreview = () => {
-    setIsPreviewOpen(true); // No need for editor.update
+    setIsPreviewOpen(true);
   };
 
   return (
@@ -158,8 +227,12 @@ export default function ClassicFormEditor() {
       {/* Header Row */}
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">Untitled form</h2>
-        <button className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 text-sm">
-          Save & Continue
+        <button
+          onClick={handleSave}
+          disabled={saving}
+          className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 text-sm disabled:opacity-50"
+        >
+          {saving ? "Saving..." : "Save & Continue"}
         </button>
       </div>
 
@@ -227,14 +300,14 @@ export default function ClassicFormEditor() {
       </div>
 
       {/* ✅ PreviewModal Usage */}
-        <PreviewModal
-            isOpen={isPreviewOpen}
-            onClose={() => setIsPreviewOpen(false)}
-            title={formTitle}
-            description={formDescriptionJSON}
-            questions={questions}
-            formData={formData}
-        />
+      <PreviewModal
+        isOpen={isPreviewOpen}
+        onClose={() => setIsPreviewOpen(false)}
+        title={formTitle}
+        description={formDescriptionJSON}
+        questions={questions}
+        formData={formData}
+      />
     </div>
   );
 }
