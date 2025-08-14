@@ -31,7 +31,7 @@ export default function PreviewModal({
             <div className="space-y-4">
                 {questions.map((field) => (
                 <div key={field.id} className="border rounded p-4 space-y-2">
-                    <label className="font-semibold block">{field.label}</label>
+                    <label className="font-semibold block">{field.text}</label>
 
                     {field.type === "input" && (
                     <input

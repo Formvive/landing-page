@@ -23,118 +23,9 @@ export default function ClassicFormEditor() {
   const [formTitle, setFormTitle] = useState("");
   const [formDescriptionJSON, setFormDescriptionJSON] = useState("");
   const [saving, setSaving] = useState(false);
-
-  const [formData, setFormData] = useState({
-    challenges: "",
-    dineOutFrequency: "",
-    restaurantFactors: "",
-    searchInfo: "",
-    expectedFeatures: "",
-    currentExperience: "",
-    pastDifficulties: "",
-    reservationPreference: "",
-    paymentOptions: "",
-    easeExpectations: "",
-    encourageSwitch: "",
-  });
-
-  const [questions, setQuestions] = useState<QuestionField[]>([
-    {
-      id: "q1",
-      label:
-        "What are the biggest challenges you face when making restaurant reservations in Nigeria?",
-      type: "textarea",
-      name: "challenges",
-      value: "",
-    },
-    {
-      id: "q2",
-      label: "How often do you dine out in restaurants?",
-      type: "radio",
-      name: "dineOutFrequency",
-      options: ["Always", "Sometimes", "Never"],
-      value: "",
-    },
-    {
-      id: "q3",
-      label: "What factors influence your choice of restaurant?",
-      type: "input",
-      name: "restaurantFactors",
-      value: "",
-    },
-    {
-      id: "q4",
-      label:
-        "What information do you typically look for when searching for a restaurant to make a reservation?",
-      type: "textarea",
-      name: "searchInfo",
-      value: "",
-    },
-    {
-      id: "q5",
-      label:
-        "What are the most important features or functionalities you expect from a table reservation website?",
-      type: "textarea",
-      name: "expectedFeatures",
-      value: "",
-    },
-    {
-      id: "q6",
-      label:
-        "How do you currently make restaurant reservations, and what is your experience with the process?",
-      type: "textarea",
-      name: "currentExperience",
-      value: "",
-    },
-    {
-      id: "q7",
-      label:
-        "Have you ever encountered any difficulties when making a reservation or during a dining experience, and how did you resolve them?",
-      type: "textarea",
-      name: "pastDifficulties",
-      value: "",
-    },
-    {
-      id: "q8",
-      label:
-        "Do you prefer to book your restaurant reservations online or over the phone?",
-      type: "radio",
-      name: "reservationPreference",
-      options: ["Phone", "Online"],
-      value: "",
-    },
-    {
-      id: "q9",
-      label:
-        "What are your preferred payment options when booking a restaurant reservation online?",
-      type: "input",
-      name: "paymentOptions",
-      value: "",
-    },
-    {
-      id: "q10",
-      label:
-        "What are your expectations regarding the ease and speed of the reservation process?",
-      type: "input",
-      name: "easeExpectations",
-      value: "",
-    },
-    {
-      id: "q11",
-      value: "",
-      label:
-        "What could a table reservation website offer that would encourage you to use it instead of traditional reservation methods?",
-      type: "textarea",
-      name: "encourageSwitch",
-    },
-  ]);
-
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
+  const [questions, setQuestions] = useState<QuestionField[]>([]);
+  const [formData, setFormData] = useState<Record<string, string>>({});
+  const token = "PUT_REAL_TOKEN_HERE"; // 🔑 Replace with actual token logic
 
   const sensors = useSensors(useSensor(PointerSensor));
 
@@ -149,37 +40,62 @@ export default function ClassicFormEditor() {
     }
   };
 
+  // const handleChange = (
+  //   e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  //   id?: string
+  // ) => {
+  //   const { name, value } = e.target;
+  //   if (id) {
+  //     // Update question label
+  //     setQuestions((prev) =>
+  //       prev.map((q) => (q.id === id ? { ...q, label: value } : q))
+  //     );
+  //   } else {
+  //     // Update formData answers
+  //     setFormData((prev) => ({ ...prev, [name]: value }));
+  //   }
+  // };
+
+  const addQuestion = () => {
+    const newId = `q${questions.length + 1}`;
+    const newQuestion: QuestionField = {
+      id: newId,
+      text: "New question",
+      type: "textarea",
+      name: `field_${newId}`,
+      value: "",
+    };
+    setQuestions((prev) => [...prev, newQuestion]);
+    setFormData((prev) => ({ ...prev, [newQuestion.name]: "" }));
+  };
+
   const handleSave = async () => {
     try {
       setSaving(true);
 
-      // 1️⃣ Create form
+      // 1️⃣ Create the form
       const formRes = await fetch(
         "https://form-vive-server.onrender.com/api/v1/user/create-form",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer authToken",
+            Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({ formName: formTitle || "Untitled Form" }),
         }
       );
-
       const formDataRes = await formRes.json();
       if (!formRes.ok || !formDataRes?.data?.id) {
         throw new Error("Failed to create form");
       }
-
       const formId = formDataRes.data.id;
 
-      // 2️⃣ Map questions to API format
+      // 2️⃣ Prepare questions
       const mappedQuestions = questions.map((q) => ({
-        text: q.label,
+        text: q.text,
         type:
-          q.type === "radio"
-            ? "MULTIPLE_CHOICE"
-            : "OPEN_ENDED",
+          q.type === "radio" ? "MULTIPLE_CHOICE" : "OPEN_ENDED",
         required: true,
         options:
           q.options?.map((opt) => ({
@@ -188,23 +104,18 @@ export default function ClassicFormEditor() {
           })) || [],
       }));
 
-      // 3️⃣ Send questions
+      // 3️⃣ Send questions to API
       const questionsRes = await fetch(
         "https://form-vive-server.onrender.com/api/v1/user/create-questions",
         {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer authToken",
+            Authorization: `Bearer ${token}`,
           },
-          body: JSON.stringify({
-            formId,
-            questions: mappedQuestions,
-          }),
+          body: JSON.stringify({ formId, questions: mappedQuestions }),
         }
       );
-
-      // const questionsData = await questionsRes.json();
       if (!questionsRes.ok) {
         throw new Error("Failed to create questions");
       }
@@ -218,15 +129,11 @@ export default function ClassicFormEditor() {
     }
   };
 
-  const handleOpenPreview = () => {
-    setIsPreviewOpen(true);
-  };
-
   return (
     <div className="max-w-5xl mx-auto px-4 py-6 space-y-8">
       {/* Header Row */}
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-semibold">Untitled form</h2>
+        <h2 className="text-xl font-semibold">{formTitle || "Untitled form"}</h2>
         <button
           onClick={handleSave}
           disabled={saving}
@@ -238,9 +145,9 @@ export default function ClassicFormEditor() {
 
       {/* Mode Tabs */}
       <div className="flex space-x-6 border-b border-gray-200 pb-2">
-        {["Classic mode", "Story mode", "Chat mode"].map((tab, idx) => (
+        {["Classic mode", "Story mode", "Chat mode"].map((tab) => (
           <button
-            key={idx}
+            key={tab}
             className={`text-sm font-medium ${
               tab === "Classic mode"
                 ? "border-b-2 border-black text-black"
@@ -256,13 +163,23 @@ export default function ClassicFormEditor() {
       <div className="bg-white border rounded-xl p-4 space-y-4">
         <input
           type="text"
-          name="title"
-          placeholder="RESEARCH"
+          placeholder="Form Title"
           className="w-full text-2xl font-semibold outline-none"
           value={formTitle}
           onChange={(e) => setFormTitle(e.target.value)}
         />
-        <RichTextEditor onChange={(value) => setFormDescriptionJSON(value)} />
+        <RichTextEditor onChange={setFormDescriptionJSON} />
+      </div>
+
+      {/* Add Question Button */}
+      <div className="pt-4">
+        <button
+          type="button"
+          onClick={addQuestion}
+          className="flex items-center text-sm text-blue-600 hover:text-blue-800"
+        >
+          ➕ Add Question
+        </button>
       </div>
 
       {/* Sortable Questions */}
@@ -278,12 +195,15 @@ export default function ClassicFormEditor() {
           >
             {questions.map((field) => (
               <SortableQuestionCard
-                key={field.id}
-                id={field.id}
-                field={field}
-                value={formData[field.name as keyof typeof formData]}
-                onChange={handleChange}
-              />
+              key={field.id}
+              id={field.id}
+              field={field}
+              answerValue={formData[field.name] || ""}
+              onAnswerChange={(id, val) => setFormData(prev => ({ ...prev, [field.name]: val }))}
+              onLabelChange={(id, newLabel) =>
+                setQuestions(prev => prev.map(q => (q.id === id ? { ...q, label: newLabel } : q)))
+              }
+            />
             ))}
           </SortableContext>
         </DndContext>
@@ -292,14 +212,14 @@ export default function ClassicFormEditor() {
       {/* Preview Button */}
       <div className="text-center pt-6">
         <button
-          onClick={handleOpenPreview}
+          onClick={() => setIsPreviewOpen(true)}
           className="bg-black text-white px-6 py-2 rounded hover:bg-gray-800"
         >
           Preview
         </button>
       </div>
 
-      {/* ✅ PreviewModal Usage */}
+      {/* Preview Modal */}
       <PreviewModal
         isOpen={isPreviewOpen}
         onClose={() => setIsPreviewOpen(false)}

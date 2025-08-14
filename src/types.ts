@@ -1,6 +1,6 @@
 export type QuestionField = {
     id: string;
-    label: string;
+    text: string;
     type: "input" | "textarea" | "radio";
     name: string;
     options?: string[];
@@ -39,6 +39,10 @@ export interface ResponseItem {
     aiFilled: boolean;
     location: string;
     age: string; // Or AgeRange if you have an enum
+    respondent?: string;
+    date?: string;
+    mode?: string;
+    progress?: "Completed" | "Pending" | string;
     createdAt: string;
     updatedAt: string;
 }
@@ -67,7 +71,9 @@ export interface LiveForm {
 
 export interface Form {
     id: string;
-    name: string;
-    updated: string;
-    responses: number;
+    formName: string;
+    updatedAt: string;
+    createdAt: string;
+    responseCount: number;
+    responses: ResponseItem[];
   }

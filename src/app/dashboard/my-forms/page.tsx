@@ -21,7 +21,7 @@ export default function MyFormsPage() {
     const fetchForms = async () => {
       try {
         const res = await fetch(
-          "https://form-vive-server.onrender.com/api/v1/user/forms",
+          "https://form-vive-server.onrender.com/api/v1/user/get-forms",
           {
             method: "GET",
             credentials: "include",
@@ -112,11 +112,11 @@ export default function MyFormsPage() {
             <tbody>
               {forms.map((form) => (
                 <tr key={form.id} className="border-b hover:bg-gray-50">
-                  <td className="px-6 py-4">{form.name}</td>
+                  <td className="px-6 py-4">{form.formName}</td>
                   <td className="px-6 py-4">
-                    {new Date(form.updated).toLocaleString()}
+                    {new Date(form.updatedAt).toLocaleString()}
                   </td>
-                  <td className="px-6 py-4">{form.responses ?? 0}</td>
+                  <td className="px-6 py-4">{form.responseCount ?? 0}</td>
                   <td className="px-6 py-4">
                     <Link
                       href={`/dashboard/my-forms/${form.id}`}
@@ -140,13 +140,13 @@ export default function MyFormsPage() {
             >
               <FileEdit size={32} className="mb-2" />
               <span className="text-sm font-medium text-center">
-                {form.name}
+                {form.formName}
               </span>
               <span className="text-xs text-gray-500 mt-1">
-                {new Date(form.updated).toLocaleString()}
+                {new Date(form.updatedAt).toLocaleString()}
               </span>
               <span className="text-xs text-gray-500 mt-1">
-                {form.responses ?? 0}
+                {form.responseCount ?? 0}
               </span>
               <button className="text-blue-600 underline text-xs">
                 <Link

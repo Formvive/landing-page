@@ -31,6 +31,7 @@ export default function DashboardPage() {
         console.log(resResponses)
         const dataResponses: GetResponsesResponseBody = await resResponses.json();
         const responses = dataResponses.data;
+        console.log("Fetched responses:", responses);
 
         // --- Totals ---
         const total = dataResponses.total;
