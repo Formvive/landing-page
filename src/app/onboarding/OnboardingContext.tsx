@@ -7,7 +7,12 @@ import './page.css';
 export default function OnboardingContext() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const userId = localStorage.getItem('userId') || searchParams.get('userId');
+  let userId = localStorage.getItem('userId') || searchParams.get('userId');
+  // Clean up userId if it contains query parameters
+  if (userId && userId.includes('?')) {
+    userId = userId.split('?')[0];
+  }
+  
 
   const [role, setRole]               = useState('');
   const [companySize, setCompanySize] = useState('');
