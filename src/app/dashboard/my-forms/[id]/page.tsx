@@ -3,17 +3,10 @@
 import { useSearchParams, useRouter, useParams } from "next/navigation";
 import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
+import SummaryTab from "@/components/SummaryTab";
 import QuestionsTab from "@/components/QuestionsTab";
-import { ResponseItem } from "@/types";
+import { ResponseData, Question, ResponseItem, FormDetails } from "@/types";
 
-type ResponseData = {
-  id: string;
-  userId: string;
-  formName: string;
-  createdAt: string;
-  updatedAt: string;
-  responses: ResponseItem[];
-};
 
 export default function FormDetailPage() {
   const { id } = useParams();
@@ -24,12 +17,23 @@ export default function FormDetailPage() {
   const [subTab, setSubTab] = useState<"summary" | "questions" | "individual">("summary");
 
   const [formDetails, setFormDetails] = useState<ResponseData | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [formQuestions, setFormQuestions] = useState<Question[]>([]);
+    const [loading, setLoading] = useState(true);
   const [token, setToken] = useState<string | null>(null);
 
   const handleTabChange = (tab: string) => {
     router.replace(`?tab=${tab}`);
   };
+
+  const combinedFormDetails: FormDetails | null =
+  formDetails && formQuestions.length > 0
+    ? {
+        questions: formQuestions,
+        responses: formDetails.responses ?? [], // ResponseItem[]
+      }
+    : null;
+
+
 
   useEffect(() => {
     const storedToken = localStorage.getItem("authToken");
@@ -55,7 +59,7 @@ export default function FormDetailPage() {
         );
         
         console.log("Fetching form details for ID:", formId);
-        console.log("Fetched form details:", res);
+        console.log("Fetched form details:", res.json);
 
         if (!res.ok) throw new Error(`Error ${res.status}`);
         const data = await res.json();
@@ -68,7 +72,36 @@ export default function FormDetailPage() {
       }
     };
 
+    const fetchFormQuestions = async () => {
+      try {
+        const res = await fetch(
+          `https://form-vive-server.onrender.com/api/v1/user/get-questions/${encodeURIComponent(formId)}`,
+          {
+            method: "GET",
+            credentials: "include",
+            headers: {
+              Authorization: `Bearer ${token}`,
+              "Content-Type": "application/json",
+            },
+          }
+        );
+        
+        console.log("Fetching form Questions for ID:", formId);
+        console.log("Fetched form Questions:", res.json);
+
+        if (!res.ok) throw new Error(`Error ${res.status}`);
+        const data = await res.json();
+        setFormQuestions(data.data);
+      } catch (err) {
+        console.error("Failed to fetch form Questions:", err);
+        setFormQuestions([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
     fetchFormDetails();
+    fetchFormQuestions();
   }, [token, formId]);
 
   if (loading) {
@@ -144,23 +177,9 @@ export default function FormDetailPage() {
           </div>
 
           {/* Sub-tab content */}
-          {subTab === "summary" && (
-            <div className="space-y-4">
-              {formDetails?.responses?.length ? (
-                formDetails.responses.map((r, i) => (
-                  <div key={i} className="border rounded-lg p-4 space-y-2">
-                    <p className="font-medium">Response {i + 1}</p>
-                    <pre className="bg-gray-50 p-2 rounded text-sm overflow-x-auto">
-                      {JSON.stringify(r, null, 2)}
-                    </pre>
-                  </div>
-                ))
-              ) : (
-                <p className="text-gray-500">No responses yet.</p>
-              )}
-            </div>
+          {subTab === "summary" && combinedFormDetails && (
+            <SummaryTab formDetails={combinedFormDetails} />
           )}
-
           {subTab === "questions" && (
             <QuestionsTab formId={id as string} token={token} />
           )}

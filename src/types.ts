@@ -6,7 +6,7 @@ export type QuestionField = {
     options?: string[];
     value?: string;
   };
-  export interface GetFormsRequestQuery {
+export interface GetFormsRequestQuery {
     userId?: string;
 }
 
@@ -77,3 +77,24 @@ export interface Form {
     responseCount: number;
     responses: ResponseItem[];
   }
+
+  export interface Question {
+    id: string;
+    text: string;
+    type: "MULTIPLE_CHOICE" | "OPEN_ENDED"; // map backend enums
+    options: { id: string; questionId: string; option: string; value: string }[];
+  };
+
+  export interface ResponseData {
+    id: string;
+    userId: string;
+    formName: string;
+    createdAt: string;
+    updatedAt: string;
+    responses: ResponseItem[];
+  };
+  export interface FormDetails {
+    questions: Question[];
+    responses: ResponseItem[]; // <-- switch here
+  }
+  

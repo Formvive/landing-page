@@ -3,30 +3,11 @@ import {
   Chart as ChartJS,
   ArcElement,
   Tooltip,
-  Legend
+  Legend,
 } from "chart.js";
+import { FormDetails } from "@/types";
 
 ChartJS.register(ArcElement, Tooltip, Legend);
-
-type Answer = {
-  questionId: string;
-  value: string;
-};
-
-type Question = {
-  id: string;
-  text: string;
-  type: "text" | "choice";
-};
-
-type Response = {
-  answers: Answer[];
-};
-
-type FormDetails = {
-  questions: Question[];
-  responses: Response[];
-};
 
 function SummaryTab({ formDetails }: { formDetails: FormDetails }) {
   if (!formDetails?.responses?.length) {
@@ -36,11 +17,10 @@ function SummaryTab({ formDetails }: { formDetails: FormDetails }) {
   return (
     <div className="space-y-6">
       {formDetails.questions.map((q) => {
-        const answers = formDetails.responses
-          .map((res) => res.answers.find((a) => a.questionId === q.id)?.value)
-          .filter(Boolean) as string[];
+        // 🔹 For now, just mock an empty array of answers
+        const answers: string[] = [];
 
-        if (q.type === "choice") {
+        if (q.type === "MULTIPLE_CHOICE") {
           const counts: Record<string, number> = {};
           answers.forEach((val) => {
             counts[val] = (counts[val] || 0) + 1;
@@ -51,9 +31,9 @@ function SummaryTab({ formDetails }: { formDetails: FormDetails }) {
             datasets: [
               {
                 data: Object.values(counts),
-                backgroundColor: ["#EF4444", "#3B82F6", "#F59E0B", "#10B981"]
-              }
-            ]
+                backgroundColor: ["#EF4444", "#3B82F6", "#F59E0B", "#10B981"],
+              },
+            ],
           };
 
           return (

@@ -2,6 +2,7 @@
 
 import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
+import { Dialog, DialogTitle, DialogPanel } from "@headlessui/react";
 
 type Question = {
   id: string;
@@ -25,7 +26,7 @@ export default function AnswerFormPage() {
   const [submitted, setSubmitted] = useState(false);
   const [token, setToken] = useState<string | null>(null);
 
-  // Get stored token
+  // Load token
   useEffect(() => {
     const storedToken = localStorage.getItem("authToken");
     setToken(storedToken);
@@ -37,7 +38,9 @@ export default function AnswerFormPage() {
     const fetchFormDetails = async () => {
       try {
         const res = await fetch(
-          `https://form-vive-server.onrender.com/api/v1/user/get-singular-form/${encodeURIComponent(formId)}`,
+          `https://form-vive-server.onrender.com/api/v1/user/get-singular-form/${encodeURIComponent(
+            formId
+          )}`,
           {
             method: "GET",
             headers: { Authorization: `Bearer ${token}` },
@@ -59,7 +62,9 @@ export default function AnswerFormPage() {
     const fetchQuestions = async () => {
       try {
         const res = await fetch(
-          `https://form-vive-server.onrender.com/api/v1/user/get-questions/${encodeURIComponent(formId)}`,
+          `https://form-vive-server.onrender.com/api/v1/user/get-questions/${encodeURIComponent(
+            formId
+          )}`,
           {
             headers: { Authorization: `Bearer ${token}` },
           }
@@ -79,7 +84,7 @@ export default function AnswerFormPage() {
   };
 
   const handleSubmit = async () => {
-    // Step 1: Create the response
+    // Step 1: Create response
     const resp = await fetch(
       "https://form-vive-server.onrender.com/api/v1/user/create-response",
       {
@@ -116,61 +121,114 @@ export default function AnswerFormPage() {
     setSubmitted(true);
   };
 
-  if (!formDetails) return <p>Loading...</p>;
-  if (submitted) return <p>✅ Thank you for your submission!</p>;
+  if (!formDetails) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-white">
+        <div className="flex flex-col items-center space-y-4">
+          {/* Spinner */}
+          <svg
+            className="animate-spin h-10 w-10 text-blue-500"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+          >
+            <circle
+              className="opacity-25"
+              cx="12"
+              cy="12"
+              r="10"
+              stroke="currentColor"
+              strokeWidth="4"
+            />
+            <path
+              className="opacity-75"
+              fill="currentColor"
+              d="M4 12a8 8 0 018-8v4a4 4 0 00-4 4H4z"
+            />
+          </svg>
+  
+          {/* Message */}
+          <p className="text-gray-600 font-medium">Loading form details...</p>
+        </div>
+      </div>
+    );
+  }
+  
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">{formDetails.formName}</h1>
-      <form
-        onSubmit={(e) => {
-          e.preventDefault();
-          handleSubmit();
-        }}
-        className="space-y-6"
-      >
-        {questions.map((q) => (
-          <div key={q.id}>
-            <label className="block font-medium mb-2">
-              {q.text} {q.required && "*"}
-            </label>
+    <div className="flex items-center justify-center min-h-screen bg-gray-50">
+      <Dialog open={true} onClose={() => {}} className="relative z-50">
+        <div className="fixed inset-0 bg-black/40" aria-hidden="true" />
+        <div className="fixed inset-0 flex items-center justify-center p-4">
+          <DialogPanel className="bg-white rounded-xl p-6 max-w-3xl w-full shadow-xl space-y-6 max-h-[85vh] overflow-y-auto">
+            <DialogTitle className="text-2xl font-semibold">
+              {submitted
+                ? "✅ Thank you for your submission!"
+                : formDetails.formName}
+            </DialogTitle>
 
-            {q.type === "MULTIPLE_CHOICE" && (
-              <div className="space-y-1">
-                {q.options.map((opt) => (
-                  <label key={opt.id} className="flex items-center gap-2">
-                    <input
-                      type="radio"
-                      name={q.id}
-                      value={opt.value}
-                      checked={answers[q.id] === opt.value}
-                      onChange={() => handleChange(q.id, opt.value)}
-                      required={q.required}
-                    />
-                    {opt.option}
-                  </label>
+            {!submitted && (
+              <form
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  handleSubmit();
+                }}
+                className="space-y-6"
+              >
+                {questions.map((q) => (
+                  <div
+                    key={q.id}
+                    className="border rounded-lg p-4 space-y-3 bg-gray-50"
+                  >
+                    <label className="font-semibold block">
+                      {q.text} {q.required && "*"}
+                    </label>
+
+                    {q.type === "MULTIPLE_CHOICE" && (
+                      <div className="space-y-2">
+                        {q.options.map((opt) => (
+                          <label
+                            key={opt.id}
+                            className="inline-flex items-center space-x-2 mr-4"
+                          >
+                            <input
+                              type="radio"
+                              name={q.id}
+                              value={opt.value}
+                              checked={answers[q.id] === opt.value}
+                              onChange={() => handleChange(q.id, opt.value)}
+                              required={q.required}
+                            />
+                            <span>{opt.option}</span>
+                          </label>
+                        ))}
+                      </div>
+                    )}
+
+                    {q.type === "OPEN_ENDED" && (
+                      <textarea
+                        className="w-full border px-3 py-2 rounded bg-white focus:ring focus:ring-blue-200"
+                        value={answers[q.id] || ""}
+                        onChange={(e) => handleChange(q.id, e.target.value)}
+                        required={q.required}
+                      />
+                    )}
+                  </div>
                 ))}
-              </div>
-            )}
 
-            {q.type === "OPEN_ENDED" && (
-              <textarea
-                className="border p-2 rounded w-full"
-                value={answers[q.id] || ""}
-                onChange={(e) => handleChange(q.id, e.target.value)}
-                required={q.required}
-              />
+                <div className="text-right">
+                  <button
+                    type="submit"
+                    className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800"
+                  >
+                    Submit
+                  </button>
+                </div>
+              </form>
             )}
-          </div>
-        ))}
-
-        <button
-          type="submit"
-          className="bg-blue-500 text-white px-4 py-2 rounded"
-        >
-          Submit
-        </button>
-      </form>
+          </DialogPanel>
+        </div>
+      </Dialog>
     </div>
   );
 }

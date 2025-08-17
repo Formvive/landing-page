@@ -35,7 +35,7 @@ export default function DashboardPage() {
 
         // --- Totals ---
         const total = dataResponses.total;
-        const manual = responses.filter(r => r.manuallyFilled).length;
+        const manual = responses.map(r => r.manuallyFilled).length;
         const ai = responses.filter(r => r.aiFilled).length;
 
         // --- Locations ---

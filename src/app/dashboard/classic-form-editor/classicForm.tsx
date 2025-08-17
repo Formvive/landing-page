@@ -24,8 +24,9 @@ export default function ClassicFormEditor() {
   const [formDescriptionJSON, setFormDescriptionJSON] = useState("");
   const [saving, setSaving] = useState(false);
   const [questions, setQuestions] = useState<QuestionField[]>([]);
-  const [formData, setFormData] = useState<Record<string, string>>({});
   const token = "PUT_REAL_TOKEN_HERE"; // 🔑 Replace with actual token logic
+  const [formData, setFormData] = useState<Record<string, string>>({});
+
 
   const sensors = useSensors(useSensor(PointerSensor));
 
@@ -40,33 +41,17 @@ export default function ClassicFormEditor() {
     }
   };
 
-  // const handleChange = (
-  //   e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
-  //   id?: string
-  // ) => {
-  //   const { name, value } = e.target;
-  //   if (id) {
-  //     // Update question label
-  //     setQuestions((prev) =>
-  //       prev.map((q) => (q.id === id ? { ...q, label: value } : q))
-  //     );
-  //   } else {
-  //     // Update formData answers
-  //     setFormData((prev) => ({ ...prev, [name]: value }));
-  //   }
-  // };
-
-  const addQuestion = () => {
+  const addQuestion = (type: "textarea" | "radio") => {
     const newId = `q${questions.length + 1}`;
     const newQuestion: QuestionField = {
       id: newId,
       text: "New question",
-      type: "textarea",
+      type,
       name: `field_${newId}`,
       value: "",
+      options: type === "radio" ? ["Option 1", "Option 2"] : [],
     };
     setQuestions((prev) => [...prev, newQuestion]);
-    setFormData((prev) => ({ ...prev, [newQuestion.name]: "" }));
   };
 
   const handleSave = async () => {
@@ -86,6 +71,7 @@ export default function ClassicFormEditor() {
         }
       );
       const formDataRes = await formRes.json();
+      console.log(formRes)
       if (!formRes.ok || !formDataRes?.data?.id) {
         throw new Error("Failed to create form");
       }
@@ -94,8 +80,7 @@ export default function ClassicFormEditor() {
       // 2️⃣ Prepare questions
       const mappedQuestions = questions.map((q) => ({
         text: q.text,
-        type:
-          q.type === "radio" ? "MULTIPLE_CHOICE" : "OPEN_ENDED",
+        type: q.type === "radio" ? "MULTIPLE_CHOICE" : "OPEN_ENDED",
         required: true,
         options:
           q.options?.map((opt) => ({
@@ -172,13 +157,21 @@ export default function ClassicFormEditor() {
       </div>
 
       {/* Add Question Button */}
-      <div className="pt-4">
+      <div className="pt-4 flex gap-4">
         <button
           type="button"
-          onClick={addQuestion}
+          onClick={() => addQuestion("textarea")}
           className="flex items-center text-sm text-blue-600 hover:text-blue-800"
         >
-          ➕ Add Question
+          ➕ Add Open-ended Question
+        </button>
+
+        <button
+          type="button"
+          onClick={() => addQuestion("radio")}
+          className="flex items-center text-sm text-green-600 hover:text-green-800"
+        >
+          ➕ Add Multiple Choice Question
         </button>
       </div>
 
@@ -195,15 +188,27 @@ export default function ClassicFormEditor() {
           >
             {questions.map((field) => (
               <SortableQuestionCard
-              key={field.id}
-              id={field.id}
-              field={field}
-              answerValue={formData[field.name] || ""}
-              onAnswerChange={(id, val) => setFormData(prev => ({ ...prev, [field.name]: val }))}
-              onLabelChange={(id, newLabel) =>
-                setQuestions(prev => prev.map(q => (q.id === id ? { ...q, label: newLabel } : q)))
-              }
-            />
+                key={field.id}
+                id={field.id}
+                field={field}
+                answerValue={formData[field.name] || ""}
+                onAnswerChange={(id, val) =>
+                  setFormData((prev) => ({ ...prev, [field.name]: val }))
+                }
+                onLabelChange={(id, newLabel) =>
+                  setQuestions((prev) =>
+                    prev.map((q) => (q.id === id ? { ...q, text: newLabel } : q))
+                  )
+                }
+                onOptionsChange={(id, newOptions) =>
+                  setQuestions((prev) =>
+                    prev.map((q) => (q.id === id ? { ...q, options: newOptions } : q))
+                  )
+                }
+                onDelete={(id) =>
+                  setQuestions((prev) => prev.filter((q) => q.id !== id))
+                }
+              />
             ))}
           </SortableContext>
         </DndContext>
@@ -226,7 +231,6 @@ export default function ClassicFormEditor() {
         title={formTitle}
         description={formDescriptionJSON}
         questions={questions}
-        formData={formData}
       />
     </div>
   );
