@@ -120,7 +120,9 @@ export default function FormEditor() {
 
       {/* Mode Tabs */}
       <div className="flex space-x-6 border-b border-gray-200 pb-2">
-        {(["classic", "story", "chat"] as Mode[]).map((tab) => (
+        {(["classic",
+        //  "story", "chat"
+        ] as Mode[]).map((tab) => (
           <button
             key={tab}
             onClick={() => setMode(tab)}
