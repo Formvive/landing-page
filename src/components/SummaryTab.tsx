@@ -10,17 +10,20 @@ import { FormDetails } from "@/types";
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 function SummaryTab({ formDetails }: { formDetails: FormDetails }) {
-  if (!formDetails?.responses?.length) {
-    return <p className="text-gray-500">No responses yet.</p>;
+  if (!formDetails?.questions?.length) {
+    return <p className="text-gray-500">No questions yet.</p>;
   }
 
   return (
     <div className="space-y-6">
       {formDetails.questions.map((q) => {
-        // 🔹 For now, just mock an empty array of answers
-        const answers: string[] = [];
+        // 🔹 Mock some placeholder answers so the UI looks alive
+        let answers: string[] = [];
 
         if (q.type === "MULTIPLE_CHOICE") {
+          // Pretend users picked some options
+          answers = ["Option A", "Option B", "Option A", "Option C", "Option D", "Option C"];
+
           const counts: Record<string, number> = {};
           answers.forEach((val) => {
             counts[val] = (counts[val] || 0) + 1;
@@ -46,6 +49,13 @@ function SummaryTab({ formDetails }: { formDetails: FormDetails }) {
             </div>
           );
         } else {
+          // Pretend users gave short text answers
+          answers = [
+            "I think this is a great feature!",
+            "Needs improvement in speed.",
+            "Very useful for my work.",
+          ];
+
           return (
             <div key={q.id} className="border rounded-lg p-4 space-y-2">
               <p className="font-medium">{q.text}</p>

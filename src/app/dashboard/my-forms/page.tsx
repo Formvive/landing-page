@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Plus, LayoutGrid, List, FileEdit } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
 import { Form } from "@/types";
 
 export default function MyFormsPage() {
@@ -9,6 +10,10 @@ export default function MyFormsPage() {
   const [forms, setForms] = useState<Form[]>([]);
   const [loading, setLoading] = useState(true);
   const [token, setToken] = useState<string | null>(null);
+
+  // 🔹 Pagination states
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize, setPageSize] = useState(5);
 
   useEffect(() => {
     const storedToken = localStorage.getItem("authToken");
@@ -36,8 +41,10 @@ export default function MyFormsPage() {
         const data = await res.json();
         console.log("Fetched forms:", data);
 
-        // The API returns { status: "ok", data: [...] }
         setForms(data?.data || []);
+        if (data?.data?.length > 10) {
+          setPageSize(10); // Reset to first page if forms exist
+        }
       } catch (error) {
         console.error("Failed to fetch forms:", error);
         setForms([]);
@@ -71,11 +78,18 @@ export default function MyFormsPage() {
     );
   }
 
+  // 🔹 Pagination logic
+  const totalForms = forms.length;
+  const totalPages = Math.ceil(totalForms / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = Math.min(startIndex + pageSize, totalForms);
+  const paginatedForms = forms.slice(startIndex, endIndex);
+
   return (
     <div className="flex flex-col space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
-        <h1 className="text-xl font-semibold">My Forms ({forms.length})</h1>
+        <h1 className="text-xl font-semibold">My Forms ({totalForms})</h1>
         <div className="flex items-center gap-2">
           <Link href={"/dashboard/create-form"}>
             <button className="flex items-center gap-2 bg-black text-white text-xs px-4 py-2 rounded-md">
@@ -99,10 +113,10 @@ export default function MyFormsPage() {
 
       {/* List view */}
       {view === "list" ? (
-        <div className="bg-white rounded-xl shadow-sm overflow-hidden">
+        <div className="bg-white rounded-xl shadow-lg overflow-hidden">
           <table className="min-w-full text-sm">
             <thead className="border-b">
-              <tr className="text-left">
+              <tr className="text-center">
                 <th className="px-6 py-3">Form Name</th>
                 <th className="px-6 py-3">Last Updated</th>
                 <th className="px-6 py-3">Responses</th>
@@ -110,17 +124,17 @@ export default function MyFormsPage() {
               </tr>
             </thead>
             <tbody>
-              {forms.map((form) => (
-                <tr key={form.id} className="border-b hover:bg-gray-50">
+              {paginatedForms.map((form) => (
+                <tr key={form.id} className="border-b hover:bg-gray-50 text-center">
                   <td className="px-6 py-4">{form.formName}</td>
                   <td className="px-6 py-4">
-                    {new Date(form.updatedAt).toLocaleString()}
+                    {formatDistanceToNow(new Date(form.updatedAt), { addSuffix: true })}
                   </td>
                   <td className="px-6 py-4">{form.responseCount ?? 0}</td>
                   <td className="px-6 py-4">
                     <Link
                       href={`/dashboard/my-forms/${form.id}`}
-                      className="text-blue-600 underline"
+                      className="text-black font-semibold underline"
                     >
                       View more
                     </Link>
@@ -133,7 +147,7 @@ export default function MyFormsPage() {
       ) : (
         // Grid view
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {forms.map((form) => (
+          {paginatedForms.map((form) => (
             <div
               key={form.id}
               className="flex flex-col items-center justify-center border rounded-xl p-4 hover:bg-gray-50 cursor-pointer"
@@ -143,7 +157,7 @@ export default function MyFormsPage() {
                 {form.formName}
               </span>
               <span className="text-xs text-gray-500 mt-1">
-                {new Date(form.updatedAt).toLocaleString()}
+                {formatDistanceToNow(new Date(form.updatedAt), { addSuffix: true })}
               </span>
               <span className="text-xs text-gray-500 mt-1">
                 {form.responseCount ?? 0}
@@ -164,14 +178,34 @@ export default function MyFormsPage() {
       {/* Footer */}
       <div className="flex justify-between items-center text-xs text-gray-500">
         <span>
-          Showing 1 - {forms.length} results of {forms.length}
+          Showing {startIndex + 1} - {endIndex} of {totalForms}
         </span>
         <div className="flex items-center gap-1">
-          <button className="p-1 rounded hover:bg-gray-200">⏪</button>
-          <select className="border rounded px-1 py-0.5 text-xs">
-            <option>01</option>
+          <button
+            className="p-1 rounded hover:bg-gray-200"
+            disabled={currentPage === 1}
+            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+          >
+            ⏪
+          </button>
+          <select
+            className="border rounded px-1 py-0.5 text-xs"
+            value={currentPage}
+            onChange={(e) => setCurrentPage(Number(e.target.value))}
+          >
+            {Array.from({ length: totalPages }, (_, i) => (
+              <option key={i + 1} value={i + 1}>
+                {i + 1}
+              </option>
+            ))}
           </select>
-          <button className="p-1 rounded hover:bg-gray-200">⏩</button>
+          <button
+            className="p-1 rounded hover:bg-gray-200"
+            disabled={currentPage === totalPages}
+            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+          >
+            ⏩
+          </button>
         </div>
       </div>
     </div>

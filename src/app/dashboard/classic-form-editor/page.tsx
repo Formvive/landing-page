@@ -101,14 +101,19 @@ function ChatFormEditor() {
 
 export default function FormEditor() {
   type Mode = "chat" | "story" | "classic";
-  const [mode, setMode] = useState<Mode>("chat");
+  const [mode, setMode] = useState<Mode>("classic");
+  const [saveFn, setSaveFn] = useState<(() => Promise<void>) | null>(null);
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6 space-y-8">
       {/* Header */}
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">Untitled form</h2>
-        <button className="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 text-sm">
+        <button
+          onClick={() => saveFn?.()}
+          className="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 text-sm"
+          disabled={!saveFn}
+        >
           Save & Continue
         </button>
       </div>
@@ -131,7 +136,7 @@ export default function FormEditor() {
       </div>
 
       {/* Mode Content */}
-      {mode === "classic" && <ClassicFormEditor />}
+      {mode === "classic" && <ClassicFormEditor onSaveReady={setSaveFn} />}
       {mode === "story" && <StoryFormEditor />}
       {mode === "chat" && <ChatFormEditor />}
     </div>

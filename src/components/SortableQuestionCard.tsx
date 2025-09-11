@@ -3,13 +3,13 @@ import { useState } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { QuestionField } from "@/types";
-import { GripVertical, Trash2 } from "lucide-react";
+import { GripVertical, Trash2, PlusCircle, X } from "lucide-react";
 
 type Props = {
   id: string;
   field: QuestionField;
-  answerValue: string;
-  onAnswerChange: (id: string, value: string) => void;
+  answerValue?: string;
+  onAnswerChange?: (id: string, value: string) => void;
   onLabelChange: (id: string, newLabel: string) => void;
   onOptionsChange?: (id: string, newOptions: string[]) => void;
   onDelete?: (id: string) => void;
@@ -18,6 +18,8 @@ type Props = {
 export default function SortableQuestionCard({
   id,
   field,
+  // answerValue,
+  // onAnswerChange,
   onLabelChange,
   onOptionsChange,
   onDelete,
@@ -54,15 +56,15 @@ export default function SortableQuestionCard({
     <div
       ref={setNodeRef}
       style={style}
-      className="bg-white border rounded-lg shadow p-4 relative"
+      className="bg-white border rounded-xl shadow-sm p-5 relative hover:shadow-md transition"
     >
       {/* Drag handle */}
       <div
-        className="absolute left-2 top-2 cursor-move text-gray-400"
+        className="absolute -left-6 top-6 cursor-grab text-gray-400 hover:text-gray-600"
         {...attributes}
         {...listeners}
       >
-        <GripVertical size={16} />
+        <GripVertical size={18} />
       </div>
 
       {/* Delete button */}
@@ -70,9 +72,9 @@ export default function SortableQuestionCard({
         <button
           type="button"
           onClick={() => onDelete(id)}
-          className="absolute right-2 top-2 text-red-500 hover:text-red-700"
+          className="absolute right-4 top-4 text-gray-400 hover:text-red-500 transition"
         >
-          <Trash2 size={16} />
+          <Trash2 size={18} />
         </button>
       )}
 
@@ -81,68 +83,68 @@ export default function SortableQuestionCard({
         type="text"
         value={field.text}
         onChange={(e) => onLabelChange(id, e.target.value)}
-        className="w-full font-medium text-lg mb-3 outline-none border-b"
-        placeholder="Enter question label"
+        className="w-full text-base font-medium outline-none border-b border-gray-200 focus:border-black pb-1"
+        placeholder="Enter your question"
       />
 
       {/* Input types */}
-      {field.type === "textarea" && (
-        <textarea
-          className="w-full border rounded p-2"
-          placeholder="User answer..."
-          disabled
-        />
-      )}
+      <div className="mt-4">
+        {field.type === "textarea" && (
+          <textarea
+            className="w-full border-b border-gray-200 focus:border-black outline-none resize-none text-sm py-1"
+            placeholder="Long answer text"
+            disabled
+          />
+        )}
 
-      {field.type === "input" && (
-        <input
-          type="text"
-          className="w-full border rounded p-2"
-          placeholder="User answer..."
-          disabled
-        />
-      )}
+        {field.type === "input" && (
+          <input
+            type="text"
+            className="w-full border-b border-gray-200 focus:border-black outline-none text-sm py-1"
+            placeholder="Short answer text"
+            disabled
+          />
+        )}
 
-      {field.type === "radio" && (
-        <div className="space-y-2">
-          {(field.options || []).map((opt, index) => (
-            <div key={index} className="flex items-center gap-2">
-              <input type="radio" disabled />
+        {field.type === "radio" && (
+          <div className="space-y-3">
+            {(field.options || []).map((opt, index) => (
+              <div key={index} className="flex items-center gap-3">
+                <input type="radio" disabled className="text-black" />
+                <input
+                  type="text"
+                  value={opt}
+                  onChange={(e) => handleEditOption(index, e.target.value)}
+                  className="flex-1 border-b border-gray-200 focus:border-black outline-none text-sm py-1"
+                />
+                <button
+                  type="button"
+                  onClick={() => handleRemoveOption(index)}
+                  className="text-gray-400 hover:text-red-500"
+                >
+                  <X size={16} />
+                </button>
+              </div>
+            ))}
+
+            {/* Add new option */}
+            <div className="flex items-center gap-3 pt-2">
+              <PlusCircle
+                size={18}
+                className="text-green-500 cursor-pointer hover:text-green-600"
+                onClick={handleAddOption}
+              />
               <input
                 type="text"
-                value={opt}
-                onChange={(e) => handleEditOption(index, e.target.value)}
-                className="border rounded px-2 py-1 flex-1"
+                value={newOption}
+                onChange={(e) => setNewOption(e.target.value)}
+                className="flex-1 border-b border-gray-200 focus:border-black outline-none text-sm py-1"
+                placeholder="Add option"
               />
-              <button
-                type="button"
-                onClick={() => handleRemoveOption(index)}
-                className="text-red-500 text-sm"
-              >
-                ✕
-              </button>
             </div>
-          ))}
-
-          {/* Add new option */}
-          <div className="flex gap-2 mt-2">
-            <input
-              type="text"
-              value={newOption}
-              onChange={(e) => setNewOption(e.target.value)}
-              className="border rounded px-2 py-1 flex-1"
-              placeholder="New option"
-            />
-            <button
-              type="button"
-              onClick={handleAddOption}
-              className="bg-green-500 text-white px-3 py-1 rounded"
-            >
-              Add
-            </button>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { QuestionField } from "@/types";
 import RichTextEditor from "@/components/LexicalEditor";
 import PreviewModal from "@/components/PreviewModal";
@@ -17,15 +17,31 @@ import {
   verticalListSortingStrategy,
 } from "@dnd-kit/sortable";
 import SortableQuestionCard from "@/components/SortableQuestionCard";
+import { FiEdit3, FiCheckCircle } from "react-icons/fi";
 
-export default function ClassicFormEditor() {
+export default function ClassicFormEditor({
+  onSaveReady,
+}: {
+  onSaveReady?: (saveFn: (() => Promise<void>) | null) => void;
+}) {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [formTitle, setFormTitle] = useState("");
   const [formDescriptionJSON, setFormDescriptionJSON] = useState("");
   const [saving, setSaving] = useState(false);
   const [questions, setQuestions] = useState<QuestionField[]>([]);
-  const token = "PUT_REAL_TOKEN_HERE"; // 🔑 Replace with actual token logic
+  const [token, setToken] = useState<string | null>(null);
   const [formData, setFormData] = useState<Record<string, string>>({});
+  // const [savedForm, setSavedForm] = useState<any>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const token = localStorage.getItem("authToken");
+      if (!token) {
+        alert("No auth token found. Please log in.");
+      };
+      setToken(token)
+    }
+  }, []);
 
 
   const sensors = useSensors(useSensor(PointerSensor));
@@ -54,7 +70,7 @@ export default function ClassicFormEditor() {
     setQuestions((prev) => [...prev, newQuestion]);
   };
 
-  const handleSave = async () => {
+  const handleSave = useCallback(async () => {
     try {
       setSaving(true);
 
@@ -105,31 +121,39 @@ export default function ClassicFormEditor() {
         throw new Error("Failed to create questions");
       }
 
-      alert("Form & questions saved successfully!");
+      // alert("Form & questions saved successfully!");
     } catch (error) {
       console.error(error);
-      alert("Error saving form");
+      // alert("Error saving form");
     } finally {
       setSaving(false);
+      // console.log(saving)
     }
-  };
+  }, [formTitle, questions, token, saving]);
+
+  useEffect(() => {
+    if (onSaveReady) {
+      // Defer to next tick so it doesn’t run during render
+      Promise.resolve().then(() => onSaveReady(handleSave));
+    }
+  }, [onSaveReady, handleSave]);
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6 space-y-8">
       {/* Header Row */}
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">{formTitle || "Untitled form"}</h2>
-        <button
+        {/* <button
           onClick={handleSave}
           disabled={saving}
           className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 text-sm disabled:opacity-50"
         >
           {saving ? "Saving..." : "Save & Continue"}
-        </button>
+        </button> */}
       </div>
 
       {/* Mode Tabs */}
-      <div className="flex space-x-6 border-b border-gray-200 pb-2">
+      {/* <div className="flex space-x-6 border-b border-gray-200 pb-2">
         {["Classic mode", "Story mode", "Chat mode"].map((tab) => (
           <button
             key={tab}
@@ -142,7 +166,7 @@ export default function ClassicFormEditor() {
             {tab}
           </button>
         ))}
-      </div>
+      </div> */}
 
       {/* Title and Description */}
       <div className="bg-white border rounded-xl p-4 space-y-4">
@@ -154,25 +178,6 @@ export default function ClassicFormEditor() {
           onChange={(e) => setFormTitle(e.target.value)}
         />
         <RichTextEditor onChange={setFormDescriptionJSON} />
-      </div>
-
-      {/* Add Question Button */}
-      <div className="pt-4 flex gap-4">
-        <button
-          type="button"
-          onClick={() => addQuestion("textarea")}
-          className="flex items-center text-sm text-blue-600 hover:text-blue-800"
-        >
-          ➕ Add Open-ended Question
-        </button>
-
-        <button
-          type="button"
-          onClick={() => addQuestion("radio")}
-          className="flex items-center text-sm text-green-600 hover:text-green-800"
-        >
-          ➕ Add Multiple Choice Question
-        </button>
       </div>
 
       {/* Sortable Questions */}
@@ -212,6 +217,27 @@ export default function ClassicFormEditor() {
             ))}
           </SortableContext>
         </DndContext>
+      </div>
+
+      {/* Floating Toolbar */}
+      <div className="fixed right-6 top-1/3 flex flex-col gap-4 bg-white p-2 rounded-xl shadow-md">
+        <button
+          type="button"
+          onClick={() => addQuestion("textarea")}
+          className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200"
+          title="Add Open-ended Question"
+        >
+          <FiEdit3 className="text-gray-700" size={20} />
+        </button>
+
+        <button
+          type="button"
+          onClick={() => addQuestion("radio")}
+          className="flex items-center justify-center w-10 h-10 rounded-full bg-gray-100 hover:bg-gray-200"
+          title="Add Multiple Choice Question"
+        >
+          <FiCheckCircle className="text-gray-700" size={20} />
+        </button>
       </div>
 
       {/* Preview Button */}

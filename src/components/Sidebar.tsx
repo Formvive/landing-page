@@ -16,7 +16,7 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose:
   ];
 
   const utilityLinks = [
-    { name: "Notifications", icon: <Bell size={18} />, href: "/notifications" },
+    { name: "Notifications", icon: <Bell size={18} />, href: "/dashboard/notifications" },
     { name: "Settings", icon: <Settings size={18} />, href: "/settings" },
     { name: "Support", icon: <LifeBuoy size={18} />, href: "/support" },
   ];
@@ -69,8 +69,12 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose:
                 <Link
                   key={link.name}
                   href={link.href}
-                  className="flex items-center gap-3 text-sm px-3 py-2 rounded-md hover:bg-gray-100 transition"
+                  className={clsx(
+                    "flex items-center gap-3 text-sm px-3 py-2 rounded-md hover:bg-gray-100 transition",
+                    pathname === link.href && "bg-gray-100 font-semibold"
+                  )}
                 >
+                  
                   {link.icon}
                   {link.name}
                 </Link>

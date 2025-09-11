@@ -118,7 +118,7 @@ export default function FormDetailPage() {
       <nav className="text-sm text-gray-600">
         <Link href="/dashboard/my-forms" className="underline">
           My Forms
-        </Link> &gt; {formDetails?.formName ?? id}
+        </Link> &gt;&gt; {formDetails?.formName ?? id}
       </nav>
 
       {/* Title */}
@@ -221,9 +221,11 @@ export default function FormDetailPage() {
                             >
                               {r.progress ?? "Pending"}
                             </span>
-                          </td>
-                          <td className="px-6 py-3 text-blue-600 underline cursor-pointer">
-                            View more
+                          </td>                          
+                          <td className="px-6 py-3 text-black underline">
+                            <Link href={`/dashboard/my-forms/${formId}/individual`}>
+                              View more
+                            </Link>
                           </td>
                         </tr>
                       ))
