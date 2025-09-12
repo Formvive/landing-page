@@ -129,7 +129,7 @@ export default function ClassicFormEditor({
       setSaving(false);
       // console.log(saving)
     }
-  }, [formTitle, questions, token, saving]);
+  }, [formTitle, questions, token]);
 
   useEffect(() => {
     if (onSaveReady) {
@@ -171,6 +171,7 @@ export default function ClassicFormEditor({
       {/* Title and Description */}
       <div className="bg-white border rounded-xl p-4 space-y-4">
         <input
+          disabled={saving}
           type="text"
           placeholder="Form Title"
           className="w-full text-2xl font-semibold outline-none"

@@ -5,8 +5,7 @@ import { useMemo, useState, useEffect } from "react";
 import Link from "next/link";
 import SummaryTab from "@/components/SummaryTab";
 import QuestionsTab from "@/components/QuestionsTab";
-import { ResponseData, Question, ResponseItem, FormDetails } from "@/types";
-
+import { ResponseData, Question, FormDetails } from "@/types";
 
 export default function FormDetailPage() {
   const { id } = useParams();
@@ -18,7 +17,7 @@ export default function FormDetailPage() {
 
   const [formDetails, setFormDetails] = useState<ResponseData | null>(null);
   const [formQuestions, setFormQuestions] = useState<Question[]>([]);
-    const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const [token, setToken] = useState<string | null>(null);
 
   const handleTabChange = (tab: string) => {
@@ -26,21 +25,24 @@ export default function FormDetailPage() {
   };
 
   const combinedFormDetails: FormDetails | null =
-  formDetails && formQuestions.length > 0
-    ? {
-        questions: formQuestions,
-        responses: formDetails.responses ?? [], // ResponseItem[]
-      }
-    : null;
-
-
+    formDetails
+      ? {
+          questions: formQuestions,
+          responses: formDetails.responses ?? [],
+        }
+      : null;
 
   useEffect(() => {
     const storedToken = localStorage.getItem("authToken");
-    setToken(storedToken);
-  }, []);
+    if (!storedToken) {
+      router.push("/login");
+    } else {
+      setToken(storedToken);
+    }
+  }, [router]);
 
   const formId = id as string;
+
   useEffect(() => {
     if (!token || !formId) return;
 
@@ -50,20 +52,17 @@ export default function FormDetailPage() {
           `https://form-vive-server.onrender.com/api/v1/user/get-singular-form/${encodeURIComponent(formId)}`,
           {
             method: "GET",
-            credentials: "include",
             headers: {
               Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
           }
         );
-        
-        console.log("Fetching form details for ID:", formId);
-        console.log("Fetched form details:", res.json);
 
         if (!res.ok) throw new Error(`Error ${res.status}`);
         const data = await res.json();
         setFormDetails(data.data);
+        console.log(data.data.responses)
       } catch (err) {
         console.error("Failed to fetch form details:", err);
         setFormDetails(null);
@@ -78,25 +77,20 @@ export default function FormDetailPage() {
           `https://form-vive-server.onrender.com/api/v1/user/get-questions/${encodeURIComponent(formId)}`,
           {
             method: "GET",
-            credentials: "include",
             headers: {
               Authorization: `Bearer ${token}`,
               "Content-Type": "application/json",
             },
           }
         );
-        
-        console.log("Fetching form Questions for ID:", formId);
-        console.log("Fetched form Questions:", res.json);
 
         if (!res.ok) throw new Error(`Error ${res.status}`);
         const data = await res.json();
         setFormQuestions(data.data);
+        console.log(data.data)
       } catch (err) {
-        console.error("Failed to fetch form Questions:", err);
+        console.error("Failed to fetch form questions:", err);
         setFormQuestions([]);
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -118,13 +112,12 @@ export default function FormDetailPage() {
       <nav className="text-sm text-gray-600">
         <Link href="/dashboard/my-forms" className="underline">
           My Forms
-        </Link> &gt;&gt; {formDetails?.formName ?? id}
+        </Link>{" "}
+        &gt;&gt; {formDetails.formName ?? id}
       </nav>
 
       {/* Title */}
-      <h1 className="text-2xl font-semibold">
-        {formDetails?.formName ?? "Untitled Form"}
-      </h1>
+      <h1 className="text-2xl font-semibold">{formDetails.formName ?? "Untitled Form"}</h1>
 
       {/* Top-level tabs */}
       <div className="flex gap-6 border-b">
@@ -136,7 +129,7 @@ export default function FormDetailPage() {
           }`}
           onClick={() => handleTabChange("responses")}
         >
-          Responses ({formDetails?.responses?.length ?? 0})
+          Responses ({formDetails.responses?.length ?? 0})
         </button>
         <button
           className={`pb-2 ${
@@ -181,7 +174,7 @@ export default function FormDetailPage() {
             <SummaryTab formDetails={combinedFormDetails} />
           )}
           {subTab === "questions" && (
-            <QuestionsTab formId={id as string} token={token} />
+            <QuestionsTab formId={formId} token={token} />
           )}
 
           {subTab === "individual" && (
@@ -190,38 +183,25 @@ export default function FormDetailPage() {
                 <table className="min-w-full text-sm">
                   <thead className="border-b">
                     <tr>
-                      <th className="px-6 py-3 text-left">Respondent</th>
+                      <th className="px-6 py-3 text-left">Location</th>
+                      <th className="px-6 py-3 text-left">Age</th>
                       <th className="px-6 py-3 text-left">Date</th>
                       <th className="px-6 py-3 text-left">Mode</th>
-                      <th className="px-6 py-3 text-left">Progress</th>
                       <th className="px-6 py-3 text-left">Action</th>
                     </tr>
                   </thead>
                   <tbody>
-                    {formDetails?.responses?.length ? (
-                      formDetails.responses.map((r: ResponseItem, idx: number) => (
-                        <tr
-                          key={idx}
-                          className="border-b hover:bg-gray-50"
-                        >
-                          <td className="px-6 py-3">{r.respondent ?? "Anonymous"}</td>
+                    {formDetails.responses?.length ? (
+                      formDetails.responses.map((r, idx) => (
+                        <tr key={idx} className="border-b hover:bg-gray-50">
+                          <td className="px-6 py-3">{r.location || "N/A"}</td>
+                          <td className="px-6 py-3">{r.age || "N/A"}</td>
                           <td className="px-6 py-3">
-                            {r.date
-                              ? new Date(r.date).toLocaleString()
-                              : "N/A"}
+                            {new Date(r.createdAt).toLocaleString()}
                           </td>
-                          <td className="px-6 py-3">{r.mode ?? "N/A"}</td>
                           <td className="px-6 py-3">
-                            <span
-                              className={
-                                r.progress === "Completed"
-                                  ? "text-green-600"
-                                  : "text-yellow-600"
-                              }
-                            >
-                              {r.progress ?? "Pending"}
-                            </span>
-                          </td>                          
+                            {r.manuallyFilled ? "Manual" : r.aiFilled ? "AI" : "N/A"}
+                          </td>
                           <td className="px-6 py-3 text-black underline">
                             <Link href={`/dashboard/my-forms/${formId}/individual`}>
                               View more
@@ -231,10 +211,7 @@ export default function FormDetailPage() {
                       ))
                     ) : (
                       <tr>
-                        <td
-                          colSpan={5}
-                          className="px-6 py-3 text-center text-gray-500"
-                        >
+                        <td colSpan={5} className="px-6 py-3 text-center text-gray-500">
                           No responses yet.
                         </td>
                       </tr>
@@ -242,23 +219,16 @@ export default function FormDetailPage() {
                   </tbody>
                 </table>
               </div>
-              <div className="flex justify-between text-xs text-gray-500">
-                <span>
-                  Showing 1 - {formDetails?.responses?.length ?? 0} results of{" "}
-                  {formDetails?.responses?.length ?? 0}
-                </span>
-              </div>
             </div>
           )}
         </>
       ) : (
-        /* Edit Form UI stays as before */
         <div className="space-y-4">
           <div className="border rounded-lg overflow-hidden">
             <input
               className="w-full text-lg font-semibold px-4 py-3 border-b outline-none"
               placeholder="Form title"
-              defaultValue={formDetails?.formName ?? ""}
+              defaultValue={formDetails.formName ?? ""}
             />
             <div className="flex items-center gap-2 px-4 py-2 border-b">
               <button className="text-gray-500">B</button>
