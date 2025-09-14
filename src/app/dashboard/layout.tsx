@@ -8,13 +8,14 @@ import DashboardHeader from "@/components/DashboardHeader";
 import { Menu } from "lucide-react";
 import { getCookie, deleteCookie } from "@/utils/cookieHelper";
 
-function isTokenExpired(token: string): boolean {
+function isTokenExpired(token?: string): boolean {
+  if (!token) return true;
   try {
-    const payload = JSON.parse(atob(token.split(".")[1])); // decode the middle part of JWT
+    const payload = JSON.parse(atob(token.split(".")[1]));
     if (!payload.exp) return false;
-    return Date.now() >= payload.exp * 1000; // exp is usually in seconds
+    return Date.now() >= payload.exp * 1000;
   } catch {
-    return true; // if token is invalid, treat as expired
+    return true;
   }
 }
 
@@ -24,12 +25,11 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   const router = useRouter();
 
   useEffect(() => {
-    const token = getCookie("authToken");
+    // Try custom auth token first, fallback to _vercel_jwt
+    const token = getCookie("authToken") || getCookie("_vercel_jwt");
 
-    // If token is missing or expired → logout
     if (!token || isTokenExpired(token)) {
       deleteCookie("authToken");
-      localStorage.removeItem("authToken");
       router.push("/login");
     } else {
       setIsCheckingAuth(false);
@@ -46,18 +46,14 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   return (
     <div className="dashboardPage flex min-h-screen">
-      {/* Sidebar */}
       <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
-
       <main className="flex-1 flex flex-col">
-        {/* Topbar for small screens */}
         <div className="md:hidden p-4 flex flex-row justify-between items-center">
           <button onClick={() => setIsSidebarOpen(true)}>
             <Menu size={24} />
           </button>
           <h2 className="text-2xl font-bold">FormVive</h2>
         </div>
-
         <DashboardHeader />
         <div className="dashContent flex-1 p-4 overflow-y-auto">{children}</div>
       </main>
