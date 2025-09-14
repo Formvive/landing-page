@@ -46,6 +46,8 @@ export default function LoginPage() {
   
       if (data.redirectUrl ) {
         localStorage.setItem('authToken', data.token);
+        document.cookie = `authToken=${data.token}; path=/; secure; samesite=lax`;
+        document.cookie = `userId=${data.userId}; path=/; secure; samesite=lax`;
         localStorage.setItem('userId', data.userId);
 
         setCookie("authToken", data.token, 3600);
@@ -54,8 +56,10 @@ export default function LoginPage() {
       }
   
       if (!data.redirectUrl) {
-        localStorage.setItem('authToken', data.data.token);
-        setCookie("authToken", data.data.token, 3600);
+        const token = data.data.token;
+        localStorage.setItem('authToken', token);
+        setCookie("authToken", token, 3600);
+        document.cookie = `authToken=${token}; path=/; secure; samesite=lax`;
         router.push('/dashboard');
       } else {
         throw new Error('Token not received from server.');
