@@ -27,6 +27,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
   useEffect(() => {
     // Try custom auth token first, fallback to _vercel_jwt
     const token = getCookie("authToken") || getCookieRaw("_vercel_jwt");
+    console.log(token);
 
     if (!token || isTokenExpired(token)) {
       deleteCookie("authToken");
