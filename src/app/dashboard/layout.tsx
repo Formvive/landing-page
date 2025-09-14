@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import Sidebar from "@/components/Sidebar";
 import DashboardHeader from "@/components/DashboardHeader";
 import { Menu } from "lucide-react";
-import { getCookie, deleteCookie } from "@/utils/cookieHelper";
+import { getCookie, deleteCookie, getCookieRaw } from "@/utils/cookieHelper";
 
 function isTokenExpired(token?: string): boolean {
   if (!token) return true;
@@ -26,7 +26,7 @@ export default function DashboardLayout({ children }: { children: React.ReactNod
 
   useEffect(() => {
     // Try custom auth token first, fallback to _vercel_jwt
-    const token = getCookie("authToken") || getCookie("_vercel_jwt");
+    const token = getCookie("authToken") || getCookieRaw("_vercel_jwt");
 
     if (!token || isTokenExpired(token)) {
       deleteCookie("authToken");
