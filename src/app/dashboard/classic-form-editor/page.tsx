@@ -1,108 +1,80 @@
 "use client";
-import { useState } from "react";
+
+import { useState, useCallback, useEffect } from "react";
 import ClassicFormEditor from "./classicForm";
 
+/** Very small Toast UI — replace or style as you like */
+function Toast({ message, onClose }: { message: string; onClose: () => void }) {
+  useEffect(() => {
+    const t = setTimeout(onClose, 3500);
+    return () => clearTimeout(t);
+  }, [onClose]);
+
+  return (
+    <div className="fixed right-4 bottom-6 z-50">
+      <div className="bg-black text-white px-4 py-2 rounded shadow">
+        {message}
+      </div>
+    </div>
+  );
+}
+
 function StoryFormEditor() {
-  const [storyBlocks, setStoryBlocks] = useState<string[]>(["Once upon a time..."]);
-  const [newBlock, setNewBlock] = useState("");
-
-  const addBlock = () => {
-    if (newBlock.trim()) {
-      setStoryBlocks((prev) => [...prev, newBlock.trim()]);
-      setNewBlock("");
-    }
-  };
-
   return (
     <div className="p-6 space-y-4 bg-white rounded-xl shadow-md">
       <h3 className="text-lg font-semibold">📖 Story Mode</h3>
       <div className="space-y-3">
-        {storyBlocks.map((block, idx) => (
-          <div
-            key={idx}
-            className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg leading-relaxed text-gray-800"
-          >
-            {block}
-          </div>
-        ))}
+        <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg leading-relaxed text-gray-800">
+          Once upon a time...
+        </div>
       </div>
-      <textarea
-        value={newBlock}
-        onChange={(e) => setNewBlock(e.target.value)}
-        placeholder="Write the next part of the story..."
-        className="w-full border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-yellow-400 focus:outline-none resize-none"
-      />
-      <button
-        onClick={addBlock}
-        className="bg-yellow-500 hover:bg-yellow-600 text-white px-5 py-2 rounded-lg font-medium shadow"
-      >
-        ➕ Add Story Block
-      </button>
     </div>
   );
 }
 
 function ChatFormEditor() {
-  const [messages, setMessages] = useState<{ from: "bot" | "user"; text: string }[]>([
-    { from: "bot", text: "👋 Hi! How can I help you create your form today?" }
-  ]);
-  const [input, setInput] = useState("");
-
-  const sendMessage = () => {
-    if (!input.trim()) return;
-    setMessages((prev) => [...prev, { from: "user", text: input.trim() }]);
-    setInput("");
-    setTimeout(() => {
-      setMessages((prev) => [
-        ...prev,
-        { from: "bot", text: "✅ Got it! I've added that to your form." }
-      ]);
-    }, 500);
-  };
-
-  return (
-    <div className="p-6 bg-white rounded-xl shadow-md flex flex-col h-[70vh]">
-      <h3 className="text-lg font-semibold mb-4">💬 Chat Mode</h3>
-      <div className="flex-1 overflow-y-auto space-y-3 mb-4">
-        {messages.map((m, idx) => (
-          <div
-            key={idx}
-            className={`flex ${m.from === "user" ? "justify-end" : "justify-start"}`}
-          >
-            <div
-              className={`max-w-xs px-4 py-2 rounded-2xl shadow-sm text-sm leading-relaxed ${
-                m.from === "bot"
-                  ? "bg-gray-100 text-gray-800 rounded-bl-none"
-                  : "bg-black text-white rounded-br-none"
-              }`}
-            >
-              {m.text}
-            </div>
-          </div>
-        ))}
-      </div>
-      <div className="flex space-x-2">
-        <input
-          value={input}
-          onChange={(e) => setInput(e.target.value)}
-          placeholder="Type your message..."
-          className="flex-1 border border-gray-300 p-3 rounded-lg focus:ring-2 focus:ring-black focus:outline-none"
-        />
-        <button
-          onClick={sendMessage}
-          className="bg-black text-white px-5 rounded-lg hover:bg-gray-800 font-medium"
-        >
-          Send
-        </button>
-      </div>
-    </div>
-  );
+  return <div className="p-6 bg-white rounded-xl shadow-md">Chat editor</div>;
 }
 
 export default function FormEditor() {
   type Mode = "chat" | "story" | "classic";
   const [mode, setMode] = useState<Mode>("classic");
   const [saveFn, setSaveFn] = useState<(() => Promise<void>) | null>(null);
+  const [childSaving, setChildSaving] = useState(false);
+  const [toastMsg, setToastMsg] = useState<string | null>(null);
+
+  // stable callbacks passed to child
+  const handleOnSaveReady = useCallback((fn: (() => Promise<void>) | null) => {
+    // store the function reference in state
+    setSaveFn(() => fn);
+  }, []);
+
+  const handleOnSavingChange = useCallback((s: boolean) => {
+    setChildSaving(s);
+  }, []);
+
+  const handleOnSaveComplete = useCallback(
+    (payload: { success: boolean; formId?: string; message?: string }) => {
+      if (payload.success) {
+        setToastMsg(payload.message ?? "Form saved successfully");
+        // optionally redirect to the new form page:
+        // if (payload.formId) router.push(`/dashboard/my-forms/${payload.formId}`)
+      } else {
+        setToastMsg(`Save failed: ${payload.message ?? "Unknown error"}`);
+      }
+    },
+    []
+  );
+
+  const doGlobalSave = async () => {
+    if (!saveFn) return;
+    try {
+      await saveFn();
+    } catch (err) {
+      // handle, but the child will call onSaveComplete so toast will show
+      console.error("Global save failed", err);
+    }
+  };
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6 space-y-8">
@@ -110,26 +82,22 @@ export default function FormEditor() {
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">Untitled form</h2>
         <button
-          onClick={() => saveFn?.()}
-          className="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 text-sm"
-          disabled={!saveFn}
+          onClick={doGlobalSave}
+          className="bg-black text-white px-4 py-2 rounded-lg hover:bg-gray-800 text-sm disabled:opacity-50"
+          disabled={!saveFn || childSaving}
         >
-          Save & Continue
+          {childSaving ? "Saving…" : saveFn ? "Save & Continue" : "Preparing…"}
         </button>
       </div>
 
       {/* Mode Tabs */}
       <div className="flex space-x-6 border-b border-gray-200 pb-2">
-        {(["classic",
-        //  "story", "chat"
-        ] as Mode[]).map((tab) => (
+        {(["classic"] as Mode[]).map((tab) => (
           <button
             key={tab}
             onClick={() => setMode(tab)}
             className={`text-sm font-medium pb-1 ${
-              tab === mode
-                ? "border-b-2 border-black text-black"
-                : "text-gray-500 hover:text-black"
+              tab === mode ? "border-b-2 border-black text-black" : "text-gray-500 hover:text-black"
             }`}
           >
             {tab.charAt(0).toUpperCase() + tab.slice(1)} Mode
@@ -137,10 +105,19 @@ export default function FormEditor() {
         ))}
       </div>
 
-      {/* Mode Content */}
-      {mode === "classic" && <ClassicFormEditor onSaveReady={setSaveFn} />}
+      {/* Mode content */}
+      {mode === "classic" && (
+        <ClassicFormEditor
+          onSaveReady={handleOnSaveReady}
+          onSavingChange={handleOnSavingChange}
+          onSaveComplete={handleOnSaveComplete}
+        />
+      )}
       {mode === "story" && <StoryFormEditor />}
       {mode === "chat" && <ChatFormEditor />}
+
+      {/* Toast */}
+      {toastMsg && <Toast message={toastMsg} onClose={() => setToastMsg(null)} />}
     </div>
   );
 }

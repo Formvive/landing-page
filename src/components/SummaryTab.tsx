@@ -10,22 +10,38 @@ import { FormDetails } from "@/types";
 ChartJS.register(ArcElement, Tooltip, Legend);
 
 function SummaryTab({ formDetails }: { formDetails: FormDetails }) {
-  if (!formDetails?.questions?.length) {
+  const { questions = [], responses = [] } = formDetails || {};
+
+  // if there are no responses at all
+  if (!responses.length) {
+    return <p className="text-gray-500">No responses yet.</p>;
+  }
+
+  if (!questions.length) {
     return <p className="text-gray-500">No questions yet.</p>;
   }
 
   return (
     <div className="space-y-6">
-      {formDetails.questions.map((q) => {
-        // 🔹 Mock some placeholder answers so the UI looks alive
-        let answers: string[] = [];
+      {questions.map((q) => {
+        // collect all answers for this question
+        const allAnswers = responses
+          .flatMap((resp) => resp.answers || [])
+          .filter((a) => a.questionId === q.id)
+          .map((a) => a.value);
+
+        if (!allAnswers.length) {
+          return (
+            <div key={q.id} className="border rounded-lg p-4">
+              <p className="font-medium mb-2">{q.text}</p>
+              <p className="text-sm text-gray-500 mb-2">No responses yet.</p>
+            </div>
+          );
+        }
 
         if (q.type === "MULTIPLE_CHOICE") {
-          // Pretend users picked some options
-          answers = ["Option A", "Option B", "Option A", "Option C", "Option D", "Option C"];
-
           const counts: Record<string, number> = {};
-          answers.forEach((val) => {
+          allAnswers.forEach((val) => {
             counts[val] = (counts[val] || 0) + 1;
           });
 
@@ -43,36 +59,25 @@ function SummaryTab({ formDetails }: { formDetails: FormDetails }) {
             <div key={q.id} className="border rounded-lg p-4">
               <p className="font-medium mb-2">{q.text}</p>
               <p className="text-sm text-gray-500 mb-4">
-                {answers.length} responses
+                {allAnswers.length} responses
               </p>
               <Pie data={data} />
             </div>
           );
-        } else {
-          // Pretend users gave short text answers
-          answers = [
-            "I think this is a great feature!",
-            "Needs improvement in speed.",
-            "Very useful for my work.",
-          ];
-
-          return (
-            <div key={q.id} className="border rounded-lg p-4 space-y-2">
-              <p className="font-medium">{q.text}</p>
-              <p className="text-sm text-gray-500">
-                {answers.length} responses
-              </p>
-              {answers.map((val, idx) => (
-                <div
-                  key={idx}
-                  className="bg-gray-50 rounded p-2 text-sm"
-                >
-                  {val}
-                </div>
-              ))}
-            </div>
-          );
         }
+
+        // for short/open text
+        return (
+          <div key={q.id} className="border rounded-lg p-4 space-y-2">
+            <p className="font-medium">{q.text}</p>
+            <p className="text-sm text-gray-500">{allAnswers.length} responses</p>
+            {allAnswers.map((val, idx) => (
+              <div key={idx} className="bg-gray-50 rounded p-2 text-sm">
+                {val}
+              </div>
+            ))}
+          </div>
+        );
       })}
     </div>
   );

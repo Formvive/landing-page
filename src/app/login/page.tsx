@@ -6,6 +6,7 @@ import './page.css';
 import { BiLeftArrow } from 'react-icons/bi';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { setCookie } from "@/utils/cookieHelper";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -46,13 +47,15 @@ export default function LoginPage() {
       if (data.redirectUrl ) {
         localStorage.setItem('authToken', data.token);
         localStorage.setItem('userId', data.userId);
+
+        setCookie("authToken", data.token, 3600);
         router.push('/onboarding');
         return;
       }
   
       if (!data.redirectUrl) {
         localStorage.setItem('authToken', data.data.token);
-        document.cookie = `authToken=${data.data.token}; path=/;`;
+        setCookie("authToken", data.data.token, 3600);
         router.push('/dashboard');
       } else {
         throw new Error('Token not received from server.');

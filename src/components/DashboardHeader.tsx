@@ -33,7 +33,6 @@ export default function DashboardHeader() {
             Authorization: `Bearer ${token}`,
           },
         });
-
         if (!res.ok) throw new Error("Failed to fetch user profile");
 
         const data = await res.json();

@@ -1,5 +1,6 @@
 "use client";
-import { useEffect, useState, useCallback } from "react";
+
+import { useEffect, useState, useCallback, useRef } from "react";
 import { QuestionField } from "@/types";
 import RichTextEditor from "@/components/LexicalEditor";
 import PreviewModal from "@/components/PreviewModal";
@@ -19,30 +20,40 @@ import {
 import SortableQuestionCard from "@/components/SortableQuestionCard";
 import { FiEdit3, FiCheckCircle } from "react-icons/fi";
 
+/**
+ * Props:
+ * - onSaveReady(saveFn | null) => gives parent a function to call to save
+ * - onSavingChange?(saving: boolean) => optional callback to notify parent
+ * - onSaveComplete?({ success, formId?, message? }) => notify parent of save result
+ */
 export default function ClassicFormEditor({
   onSaveReady,
+  onSavingChange,
+  onSaveComplete,
 }: {
   onSaveReady?: (saveFn: (() => Promise<void>) | null) => void;
+  onSavingChange?: (saving: boolean) => void;
+  onSaveComplete?: (payload: { success: boolean; formId?: string; message?: string }) => void;
 }) {
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
   const [formTitle, setFormTitle] = useState("");
   const [formDescriptionJSON, setFormDescriptionJSON] = useState("");
   const [saving, setSaving] = useState(false);
+  const savingRef = useRef(false);
   const [questions, setQuestions] = useState<QuestionField[]>([]);
   const [token, setToken] = useState<string | null>(null);
   const [formData, setFormData] = useState<Record<string, string>>({});
-  // const [savedForm, setSavedForm] = useState<any>(null);
+  const abortRef = useRef<AbortController | null>(null);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const token = localStorage.getItem("authToken");
-      if (!token) {
-        alert("No auth token found. Please log in.");
-      };
-      setToken(token)
+      const t = localStorage.getItem("authToken");
+      if (!t) {
+        console.warn("No auth token found. Save will fail until you sign in.");
+      }
+      setToken(t);
     }
   }, []);
-
 
   const sensors = useSensors(useSensor(PointerSensor));
 
@@ -52,13 +63,15 @@ export default function ClassicFormEditor({
       setQuestions((prev) => {
         const oldIndex = prev.findIndex((q) => q.id === active.id);
         const newIndex = prev.findIndex((q) => q.id === over?.id);
+        if (oldIndex === -1 || newIndex === -1) return prev;
         return arrayMove(prev, oldIndex, newIndex);
       });
     }
   };
 
   const addQuestion = (type: "textarea" | "radio") => {
-    const newId = `q${questions.length + 1}`;
+    const nextIndex = questions.length + 1;
+    const newId = `q${Date.now().toString(36)}${nextIndex}`;
     const newQuestion: QuestionField = {
       id: newId,
       text: "New question",
@@ -70,12 +83,24 @@ export default function ClassicFormEditor({
     setQuestions((prev) => [...prev, newQuestion]);
   };
 
+  // stable save function
   const handleSave = useCallback(async () => {
-    try {
-      setSaving(true);
+    if (savingRef.current) return; // prevent concurrent saves
+    if (!token) {
+      onSaveComplete?.({ success: false, message: "Not authenticated" });
+      return;
+    }
 
-      // 1️⃣ Create the form
-      const formRes = await fetch(
+    savingRef.current = true;
+    setSaving(true);
+    onSavingChange?.(true);
+
+    const controller = new AbortController();
+    abortRef.current = controller;
+
+    try {
+      // 1) create form
+      const createRes = await fetch(
         "https://form-vive-server.onrender.com/api/v1/user/create-form",
         {
           method: "POST",
@@ -84,28 +109,32 @@ export default function ClassicFormEditor({
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({ formName: formTitle || "Untitled Form" }),
+          signal: controller.signal,
         }
       );
-      const formDataRes = await formRes.json();
-      console.log(formRes)
-      if (!formRes.ok || !formDataRes?.data?.id) {
-        throw new Error("Failed to create form");
-      }
-      const formId = formDataRes.data.id;
 
-      // 2️⃣ Prepare questions
-      const mappedQuestions = questions.map((q) => ({
+      if (!createRes.ok) {
+        const t = await createRes.text().catch(() => "");
+        throw new Error(`create-form failed: ${createRes.status} ${t}`);
+      }
+
+      const createJson = await createRes.json();
+      const formId = createJson?.data?.id;
+      if (!formId) throw new Error("Invalid form id returned");
+
+      // 2) prepare questions
+      const mappedQuestions = (questions || []).map((q) => ({
         text: q.text,
         type: q.type === "radio" ? "MULTIPLE_CHOICE" : "OPEN_ENDED",
-        required: true,
+        // required: !!q.required ?? true,
         options:
-          q.options?.map((opt) => ({
+          (q.options || []).map((opt) => ({
             text: opt,
-            value: opt.toLowerCase(),
+            value: String(opt).toLowerCase().replace(/\s+/g, "_"),
           })) || [],
       }));
 
-      // 3️⃣ Send questions to API
+      // 3) create questions
       const questionsRes = await fetch(
         "https://form-vive-server.onrender.com/api/v1/user/create-questions",
         {
@@ -115,60 +144,55 @@ export default function ClassicFormEditor({
             Authorization: `Bearer ${token}`,
           },
           body: JSON.stringify({ formId, questions: mappedQuestions }),
+          signal: controller.signal,
         }
       );
+
       if (!questionsRes.ok) {
-        throw new Error("Failed to create questions");
+        const t = await questionsRes.text().catch(() => "");
+        throw new Error(`create-questions failed: ${questionsRes.status} ${t}`);
       }
 
-      // alert("Form & questions saved successfully!");
-    } catch (error) {
-      console.error(error);
-      // alert("Error saving form");
+      // success
+      onSaveComplete?.({ success: true, formId, message: "Form saved" });
+    } catch (err: unknown) {
+      console.error("Save error", err);
+      const message = err instanceof Error ? err.message : "Save failed";
+      onSaveComplete?.({ success: false, message });
     } finally {
+      savingRef.current = false;
       setSaving(false);
-      // console.log(saving)
+      onSavingChange?.(false);
+      abortRef.current = null;
     }
-  }, [formTitle, questions, token]);
+  }, [formTitle, questions, token, onSaveComplete, onSavingChange]);
 
+  // expose save function to parent and clear on unmount
   useEffect(() => {
-    if (onSaveReady) {
-      // Defer to next tick so it doesn’t run during render
-      Promise.resolve().then(() => onSaveReady(handleSave));
-    }
-  }, [onSaveReady, handleSave]);
+    onSaveReady?.(handleSave);
+    return () => {
+      if (abortRef.current) abortRef.current.abort();
+      onSaveReady?.(null);
+    };
+  }, [handleSave, onSaveReady]);
 
   return (
     <div className="max-w-5xl mx-auto px-4 py-6 space-y-8">
-      {/* Header Row */}
+      {/* header */}
       <div className="flex justify-between items-center">
         <h2 className="text-xl font-semibold">{formTitle || "Untitled form"}</h2>
-        {/* <button
-          onClick={handleSave}
-          disabled={saving}
-          className="bg-black text-white px-4 py-2 rounded hover:bg-gray-800 text-sm disabled:opacity-50"
-        >
-          {saving ? "Saving..." : "Save & Continue"}
-        </button> */}
+        <div>
+          <button
+            onClick={() => handleSave()}
+            disabled={saving || !token}
+            className="mr-2 bg-black text-white px-4 py-2 rounded hover:bg-gray-800 text-sm disabled:opacity-50"
+          >
+            {saving ? "Saving..." : "Save"}
+          </button>
+        </div>
       </div>
 
-      {/* Mode Tabs */}
-      {/* <div className="flex space-x-6 border-b border-gray-200 pb-2">
-        {["Classic mode", "Story mode", "Chat mode"].map((tab) => (
-          <button
-            key={tab}
-            className={`text-sm font-medium ${
-              tab === "Classic mode"
-                ? "border-b-2 border-black text-black"
-                : "text-gray-500 hover:text-black"
-            }`}
-          >
-            {tab}
-          </button>
-        ))}
-      </div> */}
-
-      {/* Title and Description */}
+      {/* Title & Description */}
       <div className="bg-white border rounded-xl p-4 space-y-4">
         <input
           disabled={saving}
@@ -181,46 +205,31 @@ export default function ClassicFormEditor({
         <RichTextEditor onChange={setFormDescriptionJSON} />
       </div>
 
-      {/* Sortable Questions */}
+      {/* Sortable questions */}
       <div className="space-y-6">
-        <DndContext
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={handleDragEnd}
-        >
-          <SortableContext
-            items={questions.map((q) => q.id)}
-            strategy={verticalListSortingStrategy}
-          >
+        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+          <SortableContext items={questions.map((q) => q.id)} strategy={verticalListSortingStrategy}>
             {questions.map((field) => (
               <SortableQuestionCard
                 key={field.id}
                 id={field.id}
                 field={field}
                 answerValue={formData[field.name] || ""}
-                onAnswerChange={(id, val) =>
-                  setFormData((prev) => ({ ...prev, [field.name]: val }))
-                }
+                onAnswerChange={(id, val) => setFormData((prev) => ({ ...prev, [field.name]: val }))}
                 onLabelChange={(id, newLabel) =>
-                  setQuestions((prev) =>
-                    prev.map((q) => (q.id === id ? { ...q, text: newLabel } : q))
-                  )
+                  setQuestions((prev) => prev.map((q) => (q.id === id ? { ...q, text: newLabel } : q)))
                 }
                 onOptionsChange={(id, newOptions) =>
-                  setQuestions((prev) =>
-                    prev.map((q) => (q.id === id ? { ...q, options: newOptions } : q))
-                  )
+                  setQuestions((prev) => prev.map((q) => (q.id === id ? { ...q, options: newOptions } : q)))
                 }
-                onDelete={(id) =>
-                  setQuestions((prev) => prev.filter((q) => q.id !== id))
-                }
+                onDelete={(id) => setQuestions((prev) => prev.filter((q) => q.id !== id))}
               />
             ))}
           </SortableContext>
         </DndContext>
       </div>
 
-      {/* Floating Toolbar */}
+      {/* Floating toolbar */}
       <div className="fixed right-6 top-1/3 flex flex-col gap-4 bg-white p-2 rounded-xl shadow-md">
         <button
           type="button"
@@ -230,7 +239,6 @@ export default function ClassicFormEditor({
         >
           <FiEdit3 className="text-gray-700" size={20} />
         </button>
-
         <button
           type="button"
           onClick={() => addQuestion("radio")}
@@ -241,17 +249,13 @@ export default function ClassicFormEditor({
         </button>
       </div>
 
-      {/* Preview Button */}
+      {/* Preview */}
       <div className="text-center pt-6">
-        <button
-          onClick={() => setIsPreviewOpen(true)}
-          className="bg-black text-white px-6 py-2 rounded hover:bg-gray-800"
-        >
+        <button onClick={() => setIsPreviewOpen(true)} className="bg-black text-white px-6 py-2 rounded hover:bg-gray-800">
           Preview
         </button>
       </div>
 
-      {/* Preview Modal */}
       <PreviewModal
         isOpen={isPreviewOpen}
         onClose={() => setIsPreviewOpen(false)}

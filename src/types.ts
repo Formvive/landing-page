@@ -22,7 +22,20 @@ export interface FormResponse {
 
 export interface GetFormsResponseBody {
     status: "ok";
-    data: FormResponse[];
+    data: {
+      id: string;
+      formName: string;
+      responseCount?: number;
+      responses?: {
+        id: string;
+        formId: string;
+        manuallyFilled: boolean;
+        aiFilled: boolean;
+        location?: string;
+        age?: string;
+        createdAt?: string;
+      }[];
+    }[];
 }
 
 // --- Get Responses ---
@@ -31,20 +44,28 @@ export interface GetResponsesRequestQuery {
     userId?: string;
 }
 
+export interface Answer {
+  id: string;
+  responseId: string;
+  questionId: string;
+  value: string;
+}
+
 export interface ResponseItem {
-    id: string;
-    userId: string;
-    formId: string;
-    manuallyFilled: boolean;
-    aiFilled: boolean;
-    location: string;
-    age: string; // Or AgeRange if you have an enum
-    respondent?: string;
-    date?: string;
-    mode?: string;
-    progress?: "Completed" | "Pending" | string;
-    createdAt: string;
-    updatedAt: string;
+  id: string;
+  userId: string;
+  formId: string;
+  manuallyFilled: boolean;
+  aiFilled: boolean;
+  location: string;
+  age: string;
+  respondent?: string;
+  date?: string;
+  mode?: string;
+  progress?: "Completed" | "Pending" | string;
+  createdAt: string;
+  updatedAt: string;
+  answers?: Answer[]; // ✅ Add this so SummaryTab compiles
 }
 
 export interface GetResponsesResponseBody {
@@ -94,7 +115,20 @@ export interface Form {
     responses: ResponseItem[];
   };
   export interface FormDetails {
+    formName: string;
+    id: string;
     questions: Question[];
     responses: ResponseItem[]; // <-- switch here
   }
+
+  export interface GetSingularFormResponse {
+    data: FormDetails;
+  }
   
+  export interface GetQuestionsResponse {
+    data: Question[];
+  }
+  
+  export interface GetAnswersResponse {
+    data: Answer[];
+  }

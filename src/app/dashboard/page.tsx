@@ -8,13 +8,14 @@ import StatCard from "@/components/StatCard";
 import LineChart from "@/components/LineChart";
 import DonutChart from "@/components/DonutChart";
 import AgeDemographics from "@/components/AgeDemographics";
-import { GetResponsesResponseBody, GetFormsResponseBody } from "@/types";
+import { GetFormsResponseBody } from "@/types";
 import { useRouter } from "next/navigation";
 
 interface Form {
   id: string;
   formName: string;
   responseCount: number;
+  responses?: ResponseItem[];
 }
 
 interface ResponseItem {
@@ -25,9 +26,44 @@ interface ResponseItem {
   location?: string;
   age?: string;
   createdAt?: string;
+  // any other fields...
 }
 
 const PAGE_SIZE = 10;
+
+// --- Utilities for time grouping (month keys/labels) ---
+function safeDate(d?: string | null) {
+  if (!d) return null;
+  const dt = new Date(d);
+  return isNaN(dt.getTime()) ? null : dt;
+}
+
+function monthKey(dateStr?: string | null, tz = "Africa/Lagos") {
+  const dt = safeDate(dateStr);
+  if (!dt) return null;
+  try {
+    const parts = new Intl.DateTimeFormat("en-CA", {
+      timeZone: tz,
+      year: "numeric",
+      month: "2-digit",
+    }).formatToParts(dt);
+    const year = parts.find((p) => p.type === "year")!.value;
+    const month = parts.find((p) => p.type === "month")!.value;
+    return `${year}-${month}`; // "2025-08"
+  } catch {
+    const y = dt.getUTCFullYear();
+    const m = String(dt.getUTCMonth() + 1).padStart(2, "0");
+    return `${y}-${m}`;
+  }
+}
+
+function monthLabelFromKey(key: string) {
+  // key expected "YYYY-MM"
+  const [y, m] = key.split("-");
+  const monthIndex = Number(m) - 1;
+  const dt = new Date(Number(y), monthIndex, 1);
+  return dt.toLocaleString("default", { month: "short", year: "numeric" }); // "Aug 2025"
+}
 
 export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
@@ -44,101 +80,11 @@ export default function DashboardPage() {
   const [trendData, setTrendData] = useState<{ month: string; count: number }[]>([]);
 
   useEffect(() => {
-    async function fetchData() {
-      try {
-        const token = localStorage.getItem("authToken");
-        if (!token) {
-          console.warn("No token in localStorage. Aborting dashboard fetch.");
-          setLoading(false);
-          return;
-        }
-
-        // --- Get responses ---
-        const resResponses = await fetch("https://form-vive-server.onrender.com/api/v1/user/responses", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (!resResponses.ok) {
-          const text = await resResponses.text().catch(() => "");
-          console.error("Responses fetch failed:", resResponses.status, text);
-        }
-
-        const dataResponses: GetResponsesResponseBody | undefined = await resResponses.json().catch(() => undefined);
-        const responses: ResponseItem[] = Array.isArray(dataResponses?.data) ? dataResponses!.data : [];
-
-        // --- Totals ---
-        const total = typeof dataResponses?.total === "number" ? dataResponses.total : responses.length;
-        const manual = responses.filter((r: ResponseItem) => r.manuallyFilled).length;
-        const ai = responses.filter((r: ResponseItem) => r.aiFilled).length;
-
-        // --- Locations ---
-        const locationMap: Record<string, number> = {};
-        responses.forEach((r: ResponseItem) => {
-          const loc = r.location ?? "Unknown";
-          locationMap[loc] = (locationMap[loc] || 0) + 1;
-        });
-        const locationArr = Object.entries(locationMap).map(([name, count]) => ({
-          name,
-          value: Number(((count / (total || 1)) * 100).toFixed(1)),
-        }));
-
-        // --- Age ---
-        const ageMap: Record<string, number> = {};
-        responses.forEach((r: ResponseItem) => {
-          const ageKey = r.age ?? "Unknown";
-          ageMap[ageKey] = (ageMap[ageKey] || 0) + 1;
-        });
-
-        // --- Monthly Trends ---
-        const monthMap: Record<string, number> = {};
-        responses.forEach((r: ResponseItem) => {
-          const date = r.createdAt ? new Date(r.createdAt) : null;
-          const monthName = date && !isNaN(date.getTime()) ? date.toLocaleString("default", { month: "short" }) : "Unknown";
-          monthMap[monthName] = (monthMap[monthName] || 0) + 1;
-        });
-        const trendArr = Object.entries(monthMap).map(([month, count]) => ({ month, count }));
-
-        // --- Get forms ---
-        const resForms = await fetch("https://form-vive-server.onrender.com/api/v1/admin/forms", {
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
-          },
-        });
-
-        if (!resForms.ok) {
-          const text = await resForms.text().catch(() => "");
-          console.error("Forms fetch failed:", resForms.status, text);
-        }
-
-        const dataForms: GetFormsResponseBody | undefined = await resForms.json().catch(() => undefined);
-        const formsArr: Form[] = Array.isArray(dataForms?.data) ? dataForms!.data : [];
-
-        // --- Update state ---
-        setTotalResponses(total);
-        setManualCount(manual);
-        setAiCount(ai);
-        setLocationData(locationArr);
-        setAgeData(ageMap);
-        setTrendData(trendArr);
-        setForms(formsArr);
-      } catch (err) {
-        console.error("Failed to fetch dashboard data", err);
-      } finally {
-        setLoading(false);
-      }
-    }
-
-    fetchData();
-  }, []);
-
-  useEffect(() => {
-    async function fetchForms() {
+    async function fetchAndParse() {
+      setLoading(true);
       const token = localStorage.getItem("authToken");
       if (!token) {
+        // no token -> redirect to login
         router.push("/login");
         return;
       }
@@ -152,26 +98,109 @@ export default function DashboardPage() {
         });
 
         if (!res.ok) {
-          console.error("Failed to fetch forms", res.status);
+          console.log(res);
+          const text = await res.text().catch(() => "");
+          console.error("Failed to fetch forms:", res.status, text);
           setForms([]);
+          setTotalResponses(0);
+          setLocationData([]);
+          setAgeData({});
+          setTrendData([]);
+          setManualCount(0);
+          setAiCount(0);
           return;
         }
 
-        const data: GetFormsResponseBody = await res.json();
-        setForms(data.data || []);
-      } catch (error) {
-        console.error("Error fetching forms:", error);
+        const body: GetFormsResponseBody = await res.json();
+
+        // --- Flatten all responses from all forms ---
+        const allResponses: ResponseItem[] = (body.data || []).flatMap((form) =>
+        (Array.isArray(form.responses) ? form.responses : []).map((r) => ({
+          ...r,
+          formName: form.formName,
+          formId: form.id,
+        }))
+      );
+
+        // --- Totals ---
+        const total = allResponses.length;
+        const manual = allResponses.filter((r) => r.manuallyFilled).length;
+        const ai = allResponses.filter((r) => r.aiFilled).length;
+
+        // --- Locations: aggregated as counts (DonutChart usually wants {name, value}) ---
+        const locationMap: Record<string, number> = {};
+        allResponses.forEach((r) => {
+          const loc = r.location ?? "Unknown";
+          locationMap[loc] = (locationMap[loc] || 0) + 1;
+        });
+        const locationArr = Object.entries(locationMap).map(([name, count]) => ({ name, value: count }));
+
+        // --- Age map (raw counts) ---
+        const ageMap: Record<string, number> = {};
+        allResponses.forEach((r) => {
+          const ageKey = r.age ?? "Unknown";
+          ageMap[ageKey] = (ageMap[ageKey] || 0) + 1;
+        });
+
+        // --- Monthly Trends: count per YYYY-MM, then convert to sorted array with friendly labels ---
+        const monthMap: Record<string, number> = {};
+        allResponses.forEach((r) => {
+          const mk = monthKey(r.createdAt) ?? "Unknown";
+          monthMap[mk] = (monthMap[mk] || 0) + 1;
+        });
+
+        // convert monthMap -> array, sort chronologically (Unknown last)
+        const trendArr = Object.entries(monthMap)
+          .map(([key, count]) => ({ key, count }))
+          .sort((a, b) => {
+            if (a.key === "Unknown") return 1;
+            if (b.key === "Unknown") return -1;
+            // compare YYYY-MM lexicographically works
+            return a.key.localeCompare(b.key);
+          })
+          .map((item) => ({
+            month: item.key === "Unknown" ? "Unknown" : monthLabelFromKey(item.key),
+            count: item.count,
+          }));
+
+        // --- Forms for list UI ---
+        const formsArr: Form[] = (body.data || []).map((f) => ({
+          id: f.id,
+          formName: f.formName,
+          responseCount: typeof f.responseCount === "number"
+            ? f.responseCount
+            : (Array.isArray(f.responses) ? f.responses.length : 0),
+          responses: f.responses,
+        }));
+
+        // --- Update state ---
+        setForms(formsArr);
+        setTotalResponses(total);
+        setManualCount(manual);
+        setAiCount(ai);
+        setLocationData(locationArr);
+        setAgeData(ageMap);
+        setTrendData(trendArr);
+      } catch (err) {
+        console.error("Failed to fetch/parsing dashboard data:", err);
         setForms([]);
+        setTotalResponses(0);
+        setManualCount(0);
+        setAiCount(0);
+        setLocationData([]);
+        setAgeData({});
+        setTrendData([]);
       } finally {
         setLoading(false);
       }
     }
 
-    fetchForms();
-  }, [router]);
+    fetchAndParse();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // --- Pagination logic ---
-  const totalPages = Math.ceil(forms.length / PAGE_SIZE);
+  const totalPages = Math.max(1, Math.ceil(forms.length / PAGE_SIZE));
   const startIndex = (currentPage - 1) * PAGE_SIZE;
   const currentForms = forms.slice(startIndex, startIndex + PAGE_SIZE);
 

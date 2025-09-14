@@ -15,6 +15,10 @@ export default function MyFormsPage() {
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(5);
 
+  // ✅ Pagination handlers
+  const handlePrev = () => setCurrentPage((prev) => Math.max(prev - 1, 1));
+  const handleNext = () => setCurrentPage((prev) => Math.min(prev + 1, totalPages));
+
   useEffect(() => {
     const storedToken = localStorage.getItem("authToken");
     setToken(storedToken);
@@ -22,28 +26,29 @@ export default function MyFormsPage() {
 
   useEffect(() => {
     if (!token) return;
-
+  
     const fetchForms = async () => {
       try {
-        const res = await fetch(
-          "https://form-vive-server.onrender.com/api/v1/user/get-forms",
-          {
-            method: "GET",
-            credentials: "include",
-            headers: {
-              Authorization: `Bearer ${token}`,
-              "Content-Type": "application/json",
-            },
-          }
-        );
-
+        const res = await fetch("https://form-vive-server.onrender.com/api/v1/user/get-forms", {
+          method: "GET",
+          credentials: "include",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+  
         if (!res.ok) throw new Error(`Error ${res.status}`);
         const data = await res.json();
-        console.log("Fetched forms:", data);
-
-        setForms(data?.data || []);
-        if (data?.data?.length > 10) {
-          setPageSize(10); // Reset to first page if forms exist
+  
+        // ✅ Sort by most recent updatedAt first
+        const sortedForms = (data?.data || []).sort(
+          (a: Form, b: Form) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime()
+        );
+  
+        setForms(sortedForms);
+        if (sortedForms.length > 10) {
+          setPageSize(10);
         }
       } catch (error) {
         console.error("Failed to fetch forms:", error);
@@ -52,9 +57,10 @@ export default function MyFormsPage() {
         setLoading(false);
       }
     };
-
+  
     fetchForms();
   }, [token]);
+  
 
   if (loading) {
     return <p className="text-gray-500">Loading your forms...</p>;
@@ -175,39 +181,30 @@ export default function MyFormsPage() {
         </div>
       )}
 
-      {/* Footer */}
-      <div className="flex justify-between items-center text-xs text-gray-500">
-        <span>
-          Showing {startIndex + 1} - {endIndex} of {totalForms}
-        </span>
-        <div className="flex items-center gap-1">
+      {/* Footer - Pagination Controls */}
+      {totalPages > 1 && (
+        <div className="flex justify-between items-center mt-4 text-sm">
           <button
-            className="p-1 rounded hover:bg-gray-200"
+            onClick={handlePrev}
             disabled={currentPage === 1}
-            onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+            className="px-3 py-1 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            ⏪
+            Previous
           </button>
-          <select
-            className="border rounded px-1 py-0.5 text-xs"
-            value={currentPage}
-            onChange={(e) => setCurrentPage(Number(e.target.value))}
-          >
-            {Array.from({ length: totalPages }, (_, i) => (
-              <option key={i + 1} value={i + 1}>
-                {i + 1}
-              </option>
-            ))}
-          </select>
+
+          <span className="text-gray-500">
+            Page {currentPage} of {totalPages}
+          </span>
+
           <button
-            className="p-1 rounded hover:bg-gray-200"
+            onClick={handleNext}
             disabled={currentPage === totalPages}
-            onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+            className="px-3 py-1 rounded-md border border-gray-300 text-gray-600 hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            ⏩
+            Next
           </button>
         </div>
-      </div>
+      )}
     </div>
   );
 }
