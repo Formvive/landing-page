@@ -9,7 +9,7 @@ import LineChart from "@/components/LineChart";
 import DonutChart from "@/components/DonutChart";
 import AgeDemographics from "@/components/AgeDemographics";
 import { GetFormsResponseBody } from "@/types";
-// import { useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { getAuthToken } from "@/utils/authHelper";
 
 interface Form {
@@ -70,7 +70,7 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [forms, setForms] = useState<Form[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  // const router = useRouter();
+  const router = useRouter();
   const token = getAuthToken();
 
   // --- Dashboard State ---
@@ -87,8 +87,8 @@ export default function DashboardPage() {
       // const token = localStorage.getItem("authToken");
       if (!token) {
         // no token -> redirect to login
-        // router.push("/login");
         console.log("missing token");
+        router.push("/login");
         return;
       }
 

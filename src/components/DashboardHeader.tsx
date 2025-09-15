@@ -24,8 +24,8 @@ export default function DashboardHeader() {
       const token = getAuthToken();
       console.log(token);
       if (!token) {
-        // router.push("/login");
         console.log("missing token");
+        router.push("/login");
         return;
       }
 

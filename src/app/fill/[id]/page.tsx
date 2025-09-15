@@ -3,6 +3,7 @@
 import { useParams } from "next/navigation";
 import { useState, useEffect } from "react";
 import { Dialog, DialogTitle, DialogPanel } from "@headlessui/react";
+import { getAuthToken } from "@/utils/authHelper";
 
 type Question = {
   id: string;
@@ -28,7 +29,7 @@ export default function AnswerFormPage() {
 
   // Load token
   useEffect(() => {
-    const storedToken = localStorage.getItem("authToken");
+    const storedToken = getAuthToken();
     setToken(storedToken);
   }, []);
 
