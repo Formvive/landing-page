@@ -6,7 +6,7 @@ export function getAuthToken(): string | null {
   
     // 2. Fallback to cookies (_vercel_jwt for Google login)
     if (typeof document !== "undefined") {
-      const match = document.cookie.match(/(^| )authToken=([^;]+)/);
+      const match = document.cookie.match(/(^| )_vercel_jwt=([^;]+)/);
       if (match) return match[2];
     }
   
