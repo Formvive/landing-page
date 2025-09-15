@@ -7,6 +7,7 @@ import Link from "next/link";
 import SummaryTab from "@/components/SummaryTab";
 import QuestionsTab from "@/components/QuestionsTab";
 import { ResponseItem, Question, FormDetails, Answer } from "@/types";
+import {getAuthToken} from "@/utils/authHelper";
 
 /** Ensure ResponseWithAnswers always has an answers array */
 type ResponseWithAnswers = ResponseItem & { answers: Answer[] };
@@ -22,7 +23,8 @@ export default function FormDetailPage() {
   const [formDetails, setFormDetails] = useState<FormDetails | null>(null);
   const [formQuestions, setFormQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
-  const [token, setToken] = useState<string | null>(null);
+  // const [token, setToken] = useState<string | null>(null);
+  const token = getAuthToken();
   const [loadError, setLoadError] = useState<string | null>(null);
 
   // --- typed fetch response shapes ---
@@ -83,14 +85,13 @@ export default function FormDetailPage() {
       : null;
 
   // read token once
-  useEffect(() => {
-    const storedToken = localStorage.getItem("authToken");
-    if (!storedToken) {
-      router.push("/login");
-    } else {
-      setToken(storedToken);
-    }
-  }, [router]);
+  // useEffect(() => {
+  //   // const storedToken = localStorage.getItem("authToken");
+  //   if (!token) {
+  //     console.log("missing token");
+  //     router.push("/login");
+  //   }
+  // }, [router]);
 
   const formId = id as string;
 

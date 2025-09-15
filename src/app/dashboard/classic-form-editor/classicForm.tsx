@@ -19,6 +19,7 @@ import {
 } from "@dnd-kit/sortable";
 import SortableQuestionCard from "@/components/SortableQuestionCard";
 import { FiEdit3, FiCheckCircle } from "react-icons/fi";
+import { getAuthToken } from "@/utils/authHelper";
 
 /**
  * Props:
@@ -47,7 +48,7 @@ export default function ClassicFormEditor({
 
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const t = localStorage.getItem("authToken");
+      const t = getAuthToken();
       if (!t) {
         console.warn("No auth token found. Save will fail until you sign in.");
       }

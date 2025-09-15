@@ -4,12 +4,14 @@ import Link from "next/link";
 import { Plus, LayoutGrid, List, FileEdit } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import { Form } from "@/types";
+import { getAuthToken } from "@/utils/authHelper";
 
 export default function MyFormsPage() {
   const [view, setView] = useState<"list" | "grid">("list");
   const [forms, setForms] = useState<Form[]>([]);
   const [loading, setLoading] = useState(true);
-  const [token, setToken] = useState<string | null>(null);
+  // const [token, setToken] = useState<string | null>(null);
+  const token = getAuthToken();
 
   // 🔹 Pagination states
   const [currentPage, setCurrentPage] = useState(1);
@@ -19,10 +21,10 @@ export default function MyFormsPage() {
   const handlePrev = () => setCurrentPage((prev) => Math.max(prev - 1, 1));
   const handleNext = () => setCurrentPage((prev) => Math.min(prev + 1, totalPages));
 
-  useEffect(() => {
-    const storedToken = localStorage.getItem("authToken");
-    setToken(storedToken);
-  }, []);
+  // useEffect(() => {
+  //   const storedToken = localStorage.getItem("authToken");
+  //   setToken(storedToken);
+  // }, []);
 
   useEffect(() => {
     if (!token) return;

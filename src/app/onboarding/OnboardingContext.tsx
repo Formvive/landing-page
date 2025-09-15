@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import './page.css';
+import { getAuthToken } from '@/utils/authHelper';
 
 export default function OnboardingContext() {
   const router = useRouter();
@@ -25,7 +26,7 @@ export default function OnboardingContext() {
 
   // Redirect to /signup if no token found
   useEffect(() => {
-    const token = localStorage.getItem('authToken');
+    const token = getAuthToken();
     if (!userId && !token) {
       router.push('/signup');
     }
@@ -45,7 +46,7 @@ export default function OnboardingContext() {
     setLoading(true);
 
     try {
-      const token = localStorage.getItem('authToken');
+      const token = getAuthToken();
 
       if (!token && !userId) {
         setError('Unauthorized access. Please sign up.');

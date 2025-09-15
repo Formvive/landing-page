@@ -17,8 +17,8 @@ export default function Sidebar({ isOpen, onClose }: { isOpen: boolean; onClose:
 
   const utilityLinks = [
     { name: "Notifications", icon: <Bell size={18} />, href: "/dashboard/notifications" },
-    { name: "Settings", icon: <Settings size={18} />, href: "/settings" },
-    { name: "Support", icon: <LifeBuoy size={18} />, href: "/support" },
+    { name: "Settings", icon: <Settings size={18} />, href: "/#" },
+    { name: "Support", icon: <LifeBuoy size={18} />, href: "/#" },
   ];
 
   return (

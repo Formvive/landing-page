@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Search } from "lucide-react";
 import "./components.css";
+import { getAuthToken } from "@/utils/authHelper";
 
 interface UserProfile {
   firstName: string;
@@ -20,10 +21,11 @@ export default function DashboardHeader() {
 
   useEffect(() => {
     const fetchProfile = async () => {
-      const token = localStorage.getItem("authToken");
-
+      const token = getAuthToken();
+      console.log(token);
       if (!token) {
-        router.push("/login");
+        // router.push("/login");
+        console.log("missing token");
         return;
       }
 
