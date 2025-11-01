@@ -53,13 +53,13 @@ export default function Footer() {
                         <a href="#">
                             <Image src="/assets/icons/Facebook.svg" alt="Facebook" width={20} height={20} />
                         </a>
-                        <a href="#">
+                        <a href="https://x.com/formvive">
                             <Image src="/assets/icons/X.svg" alt="Twitter" width={20} height={20} />
                         </a>
-                        <a href="#">
+                        <a href="https://www.instagram.com/formvivehq">
                             <Image src="/assets/icons/insta.svg" alt="Instagram" width={20} height={20} />
                         </a>
-                        <a href="#">
+                        <a href="https://www.linkedin.com/company/formvive">
                             <Image src="/assets/icons/LinkedIn.svg" alt="LinkedIn" width={20} height={20} />
                         </a>
                     </div>
