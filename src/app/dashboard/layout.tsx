@@ -2,8 +2,8 @@
 
 import "./page.css";
 import { useState, useEffect } from "react";
-import { checkAuthState } from "../../auth/authService"; // Ensure this path is correct
-import { useRouter } from "next/navigation"; // Import useRouter
+import { checkAuthState } from "../../auth/authService"; 
+import { useRouter } from "next/navigation"; 
 import Sidebar from "@/components/Sidebar";
 import DashboardHeader from "@/components/DashboardHeader";
 import { Menu } from "lucide-react";
@@ -11,18 +11,39 @@ import { Menu } from "lucide-react";
 export default function DashboardLayout({ children }: { children: React.ReactNode }) {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const router = useRouter(); // Initialize router
+  const router = useRouter(); 
 
   useEffect(() => {
     async function initAuth() {
+      // --- STEP 1: Check URL for Token (The "Sweeper") ---
+      if (typeof window !== "undefined") {
+        const currentUrl = window.location.href;
+        // This regex handles both '&access=' (standard) and '?access=' (your backend bug)
+        const match = currentUrl.match(/[?&]access=([^&]+)/);
+        
+        if (match && match[1]) {
+          const newToken = match[1];
+          console.log("Found token in URL, saving to storage...");
+          localStorage.setItem("authToken", newToken);
+          
+          // Optional: Clean the URL so the user doesn't see the messy token
+          // This keeps the current path but removes query params
+          const cleanPath = window.location.pathname;
+          window.history.replaceState({}, document.title, cleanPath);
+        }
+      }
+
+      // --- STEP 2: Validate Auth ---
+      // Now that we've potentially saved a new token, checkAuthState will pick it up
       const { isAuthenticated, user } = await checkAuthState();
       
       if (isAuthenticated) {
         console.log("User is logged in!", user);
-        setIsLoading(false); // Only stop loading if auth is successful
+        setIsLoading(false); 
       } else {
         console.log("User is not logged in. Redirecting...");
-        router.push("/login"); // Redirect to login
+        localStorage.removeItem("authToken"); // Clean up bad tokens
+        router.push("/login"); 
       }
     }
 

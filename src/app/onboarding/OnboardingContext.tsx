@@ -3,42 +3,77 @@
 import { useState, useEffect } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import './page.css';
-import { getAuthToken } from '@/utils/authHelper';
+// import { getAuthToken } from '@/utils/authHelper';
 
 export default function OnboardingContext() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  let userId = localStorage.getItem('userId') || searchParams.get('userId');
-  // Clean up userId if it contains query parameters
-  if (userId && userId.includes('?')) {
-    userId = userId.split('?')[0];
-  }
-  
 
-  const [role, setRole]               = useState('');
+  // State
+  const [role, setRole] = useState('');
   const [companySize, setCompanySize] = useState('');
-  const [useCase, setUseCase]         = useState('');
+  const [useCase, setUseCase] = useState('');
   const [earlyAccess, setEarlyAccess] = useState(false);
+  const [userId, setUserId] = useState<string | null>(null);
 
   const [loading, setLoading] = useState(false);
-  const [error, setError]     = useState('');
+  const [error, setError] = useState('');
   const [success, setSuccess] = useState('');
 
-  // Redirect to /signup if no token found
+  // --- 1. THE FIX: Extract Token & UserId manually on load ---
   useEffect(() => {
-    const token = getAuthToken();
-    if (!userId && !token) {
-      router.push('/signup');
+    // We access window.location.href directly to handle the 
+    // double '?' bug from the backend
+    if (typeof window !== 'undefined') {
+      const currentUrl = window.location.href;
+      
+      // A. Extract Token (handling both ?access= and &access=)
+      const tokenMatch = currentUrl.match(/[?&]access=([^&]+)/);
+      if (tokenMatch && tokenMatch[1]) {
+        const token = tokenMatch[1];
+        localStorage.setItem('authToken', token);
+        console.log("Token secured from URL");
+      }
+
+      // B. Extract UserId
+      // Try searchParams first, fallback to localStorage, fallback to Regex
+      let currentUserId = searchParams.get('userId') || localStorage.getItem('userId');
+      
+      // If searchParams got confused by the double '?', it might include the access token
+      // e.g., "user123?access=..." -> we split to get just "user123"
+      if (currentUserId && currentUserId.includes('?')) {
+        currentUserId = currentUserId.split('?')[0];
+      }
+      
+      // Fallback: If searchParams failed entirely, regex the URL for userId
+      if (!currentUserId) {
+        const idMatch = currentUrl.match(/[?&]userId=([^?&]+)/);
+        if (idMatch) currentUserId = idMatch[1];
+      }
+
+      // Final check
+      if (currentUserId) {
+        setUserId(currentUserId);
+        // Optional: Save userId to storage if you want it to persist across reloads
+        localStorage.setItem('userId', currentUserId); 
+      } else {
+        // If we really can't find an ID or a Token after all that, redirect
+        const storedToken = localStorage.getItem('authToken');
+        if (!storedToken) {
+          // Allow a small delay for state to settle, or redirect immediately
+          // router.push('/signup'); 
+        }
+      }
     }
-  }, [router, userId]);
+  }, [searchParams, router]);
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-
     setError('');
     setSuccess('');
 
-    if ( !role || !companySize || !useCase) {
+    if (!role || !companySize || !useCase) {
       setError('Please fill in all fields');
       return;
     }
@@ -46,8 +81,10 @@ export default function OnboardingContext() {
     setLoading(true);
 
     try {
-      const token = getAuthToken();
+      // Get the token we saved in the useEffect above
+      const token = typeof window !== 'undefined' ? localStorage.getItem('authToken') : null;
 
+      // Note: We use the `userId` state variable here
       if (!token && !userId) {
         setError('Unauthorized access. Please sign up.');
         router.push('/signup');
@@ -58,10 +95,11 @@ export default function OnboardingContext() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${token}`
+          // Explicitly send the Bearer token
+          'Authorization': `Bearer ${token}` 
         },
         body: JSON.stringify({
-            userId,
+          userId: userId, // Ensure this matches what your backend expects
           role,
           companySize: Number(companySize),
           useCase,
@@ -75,7 +113,6 @@ export default function OnboardingContext() {
         setError(data.message || 'Something went wrong');
       } else {
         setSuccess('Onboarding completed! Welcome...');
-        // Redirect to dashboard after short delay
         setTimeout(() => {
           router.push('/dashboard');
         }, 1000);
