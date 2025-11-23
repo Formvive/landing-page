@@ -1,3 +1,28 @@
+// types/index.ts
+
+// --- 1. NEW: Extract QuestionOption for easier editing ---
+export interface QuestionOption {
+  id: string;
+  questionId: string;
+  option: string;
+  value: string;
+}
+
+// --- 2. UPDATE: Add 'required', 'formId', and use QuestionOption ---
+export interface Question {
+  id: string;
+  formId: string; // Added to match backend
+  text: string;
+  // relaxed type to string to allow select inputs, or add "SINGLE_CHOICE" if backend supports it
+  type: "MULTIPLE_CHOICE" | "OPEN_ENDED" | "SINGLE_CHOICE" | string; 
+  required: boolean; // Added! Essential for the toggle
+  options?: QuestionOption[]; 
+  createdAt?: string;
+  updatedAt?: string;
+};
+
+// --- REST OF YOUR FILE (Preserved) ---
+
 export type QuestionField = {
     id: string;
     text: string;
@@ -5,7 +30,8 @@ export type QuestionField = {
     name: string;
     options?: string[];
     value?: string;
-  };
+};
+
 export interface GetFormsRequestQuery {
     userId?: string;
 }
@@ -38,7 +64,6 @@ export interface GetFormsResponseBody {
     }[];
 }
 
-// --- Get Responses ---
 export interface GetResponsesRequestQuery {
     formId?: string;
     userId?: string;
@@ -65,7 +90,7 @@ export interface ResponseItem {
   progress?: "Completed" | "Pending" | string;
   createdAt: string;
   updatedAt: string;
-  answers?: Answer[]; // ✅ Add this so SummaryTab compiles
+  answers?: Answer[]; 
 }
 
 export interface GetResponsesResponseBody {
@@ -88,7 +113,7 @@ export interface LiveForm {
     responses: number;
     status: string;
     previewUrl: string;
-  };
+};
 
 export interface Form {
     id: string;
@@ -97,38 +122,32 @@ export interface Form {
     createdAt: string;
     responseCount: number;
     responses: ResponseItem[];
-  }
+}
 
-  export interface Question {
-    id: string;
-    text: string;
-    type: "MULTIPLE_CHOICE" | "OPEN_ENDED"; // map backend enums
-    options: { id: string; questionId: string; option: string; value: string }[];
-  };
-
-  export interface ResponseData {
+export interface ResponseData {
     id: string;
     userId: string;
     formName: string;
     createdAt: string;
     updatedAt: string;
     responses: ResponseItem[];
-  };
-  export interface FormDetails {
+};
+
+export interface FormDetails {
     formName: string;
     id: string;
     questions: Question[];
-    responses: ResponseItem[]; // <-- switch here
-  }
+    responses: ResponseItem[]; 
+}
 
-  export interface GetSingularFormResponse {
+export interface GetSingularFormResponse {
     data: FormDetails;
-  }
+}
   
-  export interface GetQuestionsResponse {
+export interface GetQuestionsResponse {
     data: Question[];
-  }
+}
   
-  export interface GetAnswersResponse {
+export interface GetAnswersResponse {
     data: Answer[];
-  }
+}
