@@ -9,8 +9,8 @@ import LineChart from "@/components/LineChart";
 import DonutChart from "@/components/DonutChart";
 import AgeDemographics from "@/components/AgeDemographics";
 import { GetFormsResponseBody } from "@/types";
-import { useRouter } from "next/navigation";
-import { getAuthToken } from "@/utils/authHelper";
+// import { useRouter } from "next/navigation";
+// import { getAuthToken } from "@/utils/authHelper";
 
 interface Form {
   id: string;
@@ -70,8 +70,8 @@ export default function DashboardPage() {
   const [loading, setLoading] = useState(true);
   const [forms, setForms] = useState<Form[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
-  const router = useRouter();
-  const token = getAuthToken();
+  // const router = useRouter();
+  // const token = getAuthToken();
 
   // --- Dashboard State ---
   const [totalResponses, setTotalResponses] = useState(0);
@@ -85,19 +85,21 @@ export default function DashboardPage() {
     async function fetchAndParse() {
       setLoading(true);
       // const token = localStorage.getItem("authToken");
-      if (!token) {
-        // no token -> redirect to login
-        console.log("missing token");
-        router.push("/login");
-        return;
-      }
+      // if (!token) {
+      //   // no token -> redirect to login
+      //   console.log("missing token");
+      //   router.push("/login");
+      //   return;
+      // }
 
       try {
         const res = await fetch("https://form-vive-server.onrender.com/api/v1/user/get-forms", {
+          method: "GET",
           headers: {
-            Authorization: `Bearer ${token}`,
+            // Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
+          credentials: "include",
         });
 
         if (!res.ok) {
